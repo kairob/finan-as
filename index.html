@@ -486,16 +486,16 @@
 
     <!-- SCRIPT FINANÇAS -->
     <script>
-        // --- BASE DE DADOS ORIGINAL COM DIAS DE VENCIMENTO CONSTANTES ---
+        // --- BASE DE DADOS ORIGINAL COM DIAS DE VENCIMENTO E SEMANAS MANUAIS ---
         const initialCards = [
-            { id: '1', name: 'NIO', totalBill: 2779.00, dueDay: 10 },
-            { id: '2', name: 'MERCADO PAGO', totalBill: 2120.00, dueDay: 10 },
-            { id: '3', name: 'SANTANDER', totalBill: 100.00, dueDay: 1 },
-            { id: '4', name: 'MARISA', totalBill: 247.00, dueDay: 12 },
-            { id: '5', name: 'PICPAY', totalBill: 1031.78, dueDay: 10 },
-            { id: '6', name: 'CARRO', totalBill: 2398.00, dueDay: 27 },
-            { id: '7', name: 'JOGO', totalBill: 150.00, dueDay: 1 },
-            { id: '8', name: 'AJUSTE', totalBill: -1500.00, dueDay: 1 }
+            { id: '1', name: 'NIO', totalBill: 2779.00, dueDay: 10, weeks: 3 },
+            { id: '2', name: 'MERCADO PAGO', totalBill: 2120.00, dueDay: 10, weeks: 3 },
+            { id: '3', name: 'SANTANDER', totalBill: 100.00, dueDay: 1, weeks: 1 },
+            { id: '4', name: 'MARISA', totalBill: 247.00, dueDay: 12, weeks: 3 },
+            { id: '5', name: 'PICPAY', totalBill: 1031.78, dueDay: 10, weeks: 3 },
+            { id: '6', name: 'CARRO', totalBill: 2398.00, dueDay: 27, weeks: 4 },
+            { id: '7', name: 'JOGO', totalBill: 150.00, dueDay: 1, weeks: 1 },
+            { id: '8', name: 'AJUSTE', totalBill: -1500.00, dueDay: 1, weeks: 1 }
         ];
 
         const initialLoans = [
@@ -506,7 +506,14 @@
             { id: '5', name: 'LETICIA', MP: 161.00, PP: 136.00, SAN: 0, NIO: 0 }
         ];
 
-        let simulatedTodayStr = localStorage.getItem('simulated_today') || '2026-05-19';
+        // --- CAPTURA AUTOMÁTICA DA DATA DE HOJE REAL DO DISPOSITIVO ---
+        const todayReal = new Date();
+        const yearReal = todayReal.getFullYear();
+        const monthReal = String(todayReal.getMonth() + 1).padStart(2, '0');
+        const dayReal = String(todayReal.getDate()).padStart(2, '0');
+        const defaultTodayStr = `${yearReal}-${monthReal}-${dayReal}`;
+
+        let simulatedTodayStr = localStorage.getItem('simulated_today') || defaultTodayStr;
 
         let state = {
             cards: JSON.parse(localStorage.getItem('w_cards_exact_v2')) || initialCards,
@@ -542,22 +549,16 @@
             renderActiveTab();
         }
 
-        // --- FUNÇÃO PARA CALCULAR A DATA DE VENCIMENTO DINÂMICA COM VIRAGEM ANTECIPADA ---
+        // --- FUNÇÃO DE VENCIMENTO DINÂMICO (APENAS CONTRA-RELÓGIO INFORMATIVO) ---
         function getNextDueDate(dueDay, today) {
             let year = today.getFullYear();
             let month = today.getMonth(); // 0-11
             
-            // Cria a data candidata para o mês atual
+            // Cria a data de vencimento no mês atual
             let candidate = new Date(year, month, dueDay, 0, 0, 0);
             
-            // LÓGICA DE TRANSIÇÃO ANTECIPADA (Rollover):
-            // Se o vencimento deste mês já passou OU se faltam menos de 3 dias para ele,
-            // passamos automaticamente a meta para o mês seguinte. Isso evita que as metas dupliquem
-            // de valor nos últimos dias do pagamento.
-            const diffTime = candidate - today;
-            const diffDays = diffTime / (1000 * 60 * 60 * 24);
-            
-            if (candidate < today || diffDays < 3) {
+            // Se o dia do vencimento já passou neste mês, passa para o próximo automaticamente
+            if (candidate < today) {
                 candidate = new Date(year, month + 1, dueDay, 0, 0, 0);
             }
             return candidate;
@@ -587,21 +588,15 @@
 
                 const myShare = c.totalBill - loansOnThisCard;
                 
-                // Calcula o vencimento inteligente
+                // Calcula a contagem decrescente real em dias (Informativo e visual)
                 const computedDueDate = getNextDueDate(c.dueDay, today);
-                
-                // Dias restantes reais de hoje até o vencimento
                 const diffTime = computedDueDate - today;
-                let diffDays = diffTime / (1000 * 60 * 60 * 24);
-                
-                // Semanas exatas em formato decimal apenas para exibição no painel
-                let calculatedWeeks = diffDays / 7;
-                if (calculatedWeeks <= 0) calculatedWeeks = 0.1;
+                const diffDays = diffTime / (1000 * 60 * 60 * 24);
+                const daysRemainingWeeks = diffDays / 7;
 
-                // ESTABILIDADE ORÇAMENTAL:
-                // Para evitar que a meta semanal dobre quando a data de vencimento se aproxima,
-                // a contribuição semanal baseia-se sempre num ciclo estável de 4 semanas (um mês completo).
-                const weeklyContribution = myShare / 4.0;
+                // CÁLCULO ESTÁVEL: Divide estritamente pelo número de semanas que você define manualmente!
+                const cardWeeks = parseFloat(c.weeks) || 4; 
+                const weeklyContribution = myShare / cardWeeks;
                 totalWeeklyMeta += weeklyContribution;
 
                 return {
@@ -610,7 +605,7 @@
                     myShare, 
                     computedDueDate,
                     daysRemaining: diffDays, 
-                    calculatedWeeks: calculatedWeeks, 
+                    calculatedWeeks: daysRemainingWeeks, 
                     weeklyTarget: weeklyContribution
                 };
             });
@@ -662,8 +657,10 @@
                     <h2 class="meta-card-value">${formatBRL(data.totalWeeklyMeta)}</h2>
                     <p class="meta-card-desc">Cálculo contínuo com acréscimo de +25% para combustível.</p>
                 </div>
+                
+                <!-- SENSOR AUTOMÁTICO DE DATA DE HOJE -->
                 <div class="sim-container">
-                    <span class="sim-title">Dia de Hoje:</span>
+                    <span class="sim-title">Sensor de Data (Hoje):</span>
                     <input type="date" class="sim-input" value="${simulatedTodayStr}" onchange="updateSimulatedToday(this.value)">
                 </div>
                 
@@ -687,11 +684,13 @@
                     <h3 class="section-title">Esforço Semanal Requerido</h3>
                     ${data.processedCards.map(c => {
                         let color = c.daysRemaining < 0 ? 'rose' : (c.daysRemaining <= 7 ? 'amber' : 'green');
+                        // Mostra o tempo real decrescente, mas sem oscilar a sua meta semanal
+                        let visualWeeksLeft = c.daysRemaining / 7;
                         return `
                             <div class="item-card" style="flex-direction: row; justify-content: space-between; align-items: center; padding: 14px 16px;">
                                 <div>
                                     <div class="item-title-wrapper"><span class="status-dot ${color}"></span><span class="item-title">${c.name}</span></div>
-                                    <span class="item-subtitle" style="display: block; margin-left: 18px;">${c.calculatedWeeks.toFixed(2)} sem (${Math.ceil(c.daysRemaining)} dias)</span>
+                                    <span class="item-subtitle" style="display: block; margin-left: 18px;">Ciclo Fixo: ${c.weeks}s | Restam ${visualWeeksLeft.toFixed(2)}s (${Math.ceil(c.daysRemaining)} dias)</span>
                                 </div>
                                 <div style="text-align: right;">
                                     <span class="item-value-main" style="color: var(--primary); font-size: 15px; font-weight: 800;">${formatBRL(c.weeklyTarget)}/sem</span>
@@ -718,7 +717,7 @@
                             <div class="info-grid-3">
                                 <div class="info-cell"><span class="info-grid-label">Parcerias</span><span class="info-grid-value teal">${formatBRL(c.loansTotal)}</span></div>
                                 <div class="info-cell"><span class="info-grid-label">Líquido</span><span class="info-grid-value">${formatBRL(c.myShare)}</span></div>
-                                <div class="info-cell"><span class="info-grid-label">Semanas</span><span class="info-grid-value emerald">${c.calculatedWeeks.toFixed(2)}s</span></div>
+                                <div class="info-cell"><span class="info-grid-label">Semanas Def.</span><span class="info-grid-value emerald">${c.weeks}s</span></div>
                             </div>
                             <div class="card-actions">
                                 <span>Meta Base: <strong style="color: var(--primary);">${formatBRL(c.weeklyTarget)}</strong></span>
@@ -776,9 +775,10 @@
             if (type === 'cartao') {
                 fields.innerHTML = `
                     <div class="form-group"><label class="form-label">Nome do Cartão/Despesa</label><input type="text" id="c-name" required class="form-control"></div>
+                    <div class="form-group"><label class="form-label">Fatura (R$)</label><input type="number" step="0.01" id="c-bill" required class="form-control"></div>
                     <div class="form-grid-2">
-                        <div class="form-group"><label class="form-label">Fatura (R$)</label><input type="number" step="0.01" id="c-bill" required class="form-control"></div>
                         <div class="form-group"><label class="form-label">Dia do Vencimento (1-31)</label><input type="number" min="1" max="31" id="c-day" required class="form-control" placeholder="Ex: 10"></div>
+                        <div class="form-group"><label class="form-label">Semanas para Divisão</label><input type="number" min="1" max="52" id="c-weeks" required class="form-control" placeholder="Ex: 4"></div>
                     </div>`;
             } else {
                 fields.innerHTML = `
@@ -798,11 +798,12 @@
                 const name = document.getElementById('c-name').value.toUpperCase();
                 const totalBill = parseFloat(document.getElementById('c-bill').value);
                 const dueDay = parseInt(document.getElementById('c-day').value);
+                const weeks = parseInt(document.getElementById('c-weeks').value) || 4;
                 if(state.editingId) {
                     const idx = state.cards.findIndex(c => c.id === state.editingId);
-                    state.cards[idx] = { id: state.editingId, name, totalBill, dueDay };
+                    state.cards[idx] = { id: state.editingId, name, totalBill, dueDay, weeks };
                 } else {
-                    state.cards.push({ id: Date.now().toString(), name, totalBill, dueDay });
+                    state.cards.push({ id: Date.now().toString(), name, totalBill, dueDay, weeks });
                 }
                 switchTab('cartoes');
             } else {
@@ -832,8 +833,10 @@
             document.getElementById('c-name').value = c.name;
             document.getElementById('c-bill').value = c.totalBill;
             document.getElementById('c-day').value = c.dueDay;
+            document.getElementById('c-weeks').value = c.weeks || 4;
         }
 
+        // Remover cartão
         function deleteCard(id) {
             if (confirm('Remover despesa?')) { state.cards = state.cards.filter(i => i.id !== id); saveState(); renderActiveTab(); }
         }
@@ -850,6 +853,7 @@
             document.getElementById('l-nio').value = l.NIO;
         }
 
+        // Remover devedor
         function deleteLoan(id) {
             if (confirm('Remover devedor?')) { state.loans = state.loans.filter(i => i.id !== id); saveState(); renderActiveTab(); }
         }

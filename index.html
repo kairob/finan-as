@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Meta Semanal Exata - Finanças</title>
+    <style>
+        /* --- ESTILOS NATIVOS CSS (Sem conexões externas para segurança total no SharePoint e funcionamento offline) --- */
+        :root {
+            --bg-main: #020617;
+            --bg-card: #0f172a;
+            --bg-input: #020617;
+            --border-color: rgba(51, 65, 85, 0.6);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --primary-light: rgba(16, 185, 129, 0.1);
+            --secondary: #14b8a6;
+            --accent-rose: #f43f5e;
+            --accent-amber: #f59e0b;
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            height: 100%;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* --- CABEÇALHO --- */
+        header {
+            background-color: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            z-index: 40;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #020617;
+            font-weight: 800;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        .header-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1.2;
+        }
+
+        .header-subtitle {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .header-badge {
+            font-size: 10px;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        /* --- CONTEÚDO PRINCIPAL --- */
+        main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            padding-bottom: 112px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        main::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* --- CARDS E MÉTRICAS --- */
+        .meta-card {
+            background: linear-gradient(135deg, var(--bg-card), #061510);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .meta-card-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            display: block;
+        }
+
+        .meta-card-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-top: 8px;
+        }
+
+        .meta-card-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-cols: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .summary-card {
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            padding: 16px;
+            border-radius: 16px;
+        }
+
+        .summary-label {
+            font-size: 9px;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .summary-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin-top: 4px;
+            display: block;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .item-card {
+            background-color: var(--bg-card);
+            border: 1px solid rgba(51, 65, 85, 0.8);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .item-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .item-title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        .status-dot.green { background-color: var(--primary); }
+        .status-dot.amber { background-color: var(--accent-amber); }
+        .status-dot.rose { background-color: var(--accent-rose); }
+
+        .item-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        .item-subtitle {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        .item-value-side {
+            text-align: right;
+        }
+
+        .item-value-label {
+            font-size: 9px;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .item-value-main {
+            font-size: 14px;
+            font-weight: 700;
+            color: #e2e8f0;
+        }
+
+        .info-grid {
+            background-color: #020617;
+            padding: 12px;
+            border-radius: 12px;
+            display: grid;
+            grid-template-cols: 1fr 1fr;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .info-grid-3 {
+            background-color: #020617;
+            padding: 12px;
+            border-radius: 12px;
+            display: grid;
+            grid-template-cols: 1fr 1fr 1fr;
+            gap: 8px;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .info-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .info-grid-label {
+            font-size: 9px;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .info-grid-value {
+            font-weight: 700;
+            color: #cbd5e1;
+        }
+        .info-grid-value.teal { color: var(--secondary); }
+        .info-grid-value.emerald { color: var(--primary); }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .info-row span:first-child { color: var(--text-muted); }
+        .info-row span:last-child { font-weight: 700; color: #cbd5e1; }
+
+        .card-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 8px;
+            border-top: 1px solid rgba(51, 65, 85, 0.4);
+            font-size: 12px;
+        }
+
+        .action-button-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-action {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-action.edit { background-color: rgba(51, 65, 85, 0.8); color: #cbd5e1; }
+        .btn-action.delete { background-color: rgba(244, 63, 94, 0.1); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.2); }
+
+        /* --- NAVEGAÇÃO INFERIOR --- */
+        nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border-color);
+            padding: 8px 16px 12px 16px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 40;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-muted);
+            cursor: pointer;
+            width: 64px;
+        }
+
+        .nav-btn.active { color: var(--primary); }
+        .nav-btn span { font-size: 9px; font-weight: 700; margin-top: 4px; }
+        .nav-btn-icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.5; }
+
+        .nav-add-btn {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 16px;
+            color: #020617;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: translateY(-16px);
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+        }
+
+        /* --- MODAL --- */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(2, 6, 23, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 16px;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+        .modal-container {
+            background-color: var(--bg-card);
+            width: 100%;
+            max-width: 448px;
+            border-radius: 24px 24px 0 0;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.open .modal-container { transform: translateY(0); }
+
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 16px; }
+        .modal-title { font-size: 16px; font-weight: 700; color: #ffffff; }
+        .modal-close { background: none; border: none; color: var(--text-muted); cursor: pointer; }
+
+        .modal-tabs { display: flex; background-color: var(--bg-main); padding: 4px; border-radius: 12px; margin-bottom: 16px; gap: 4px; }
+        .modal-tab-btn { flex: 1; background: none; border: none; color: var(--text-muted); font-size: 12px; font-weight: 700; padding: 8px; border-radius: 8px; cursor: pointer; }
+        .modal-tab-btn.active { background-color: var(--primary); color: #020617; }
+
+        /* Formulários */
+        .form-group { margin-bottom: 14px; }
+        .form-grid-2 { display: grid; grid-template-cols: 1fr 1fr; gap: 12px; }
+        .form-label { display: block; font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+        .form-control { width: 100%; background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; color: #ffffff; font-size: 14px; outline: none; }
+
+        .btn-submit {
+            width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border: none; border-radius: 12px; color: #020617; font-size: 13px; font-weight: 800; text-transform: uppercase; cursor: pointer; margin-top: 12px;
+        }
+
+        .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background-color: #0f172a; color: var(--primary); font-size: 12px; font-weight: 700; padding: 12px 20px; border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.2); z-index: 100; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
+        .toast.show { opacity: 1; }
+
+        .sim-container { background-color: rgba(15, 23, 42, 0.4); border: 1px dashed var(--border-color); padding: 12px 16px; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; }
+        .sim-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+        .sim-input { background-color: #020617; border: 1px solid var(--border-color); border-radius: 8px; color: #fff; padding: 4px 8px; font-size: 11px; outline: none; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-brand">
+            <div class="header-logo">$</div>
+            <div>
+                <h1 class="header-title">Meta Semanal</h1>
+                <p class="header-subtitle">Planeamento Exato por Data</p>
+            </div>
+        </div>
+        <div class="header-badge" id="current-badge-date">Maio/Junho 2026</div>
+    </header>
+
+    <main id="main-content">
+        <!-- Injetado Dinamicamente -->
+    </main>
+
+    <nav>
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn active">
+            <svg class="nav-btn-icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
+            <span>Painel</span>
+        </button>
+        <button onclick="switchTab('cartoes')" id="nav-cartoes" class="nav-btn">
+            <svg class="nav-btn-icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+            <span>Cartões</span>
+        </button>
+        <button onclick="switchTab('partilhas')" id="nav-partilhas" class="nav-btn">
+            <svg class="nav-btn-icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+            <span>Partilhas</span>
+        </button>
+        <button onclick="openAddModal()" class="nav-add-btn">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+        </button>
+    </nav>
+
+    <!-- MODAL -->
+    <div id="modal" class="modal-overlay" onclick="handleOverlayClick(event)">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-title">Novo Registo</h3>
+                <button onclick="closeAddModal()" class="modal-close">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div class="modal-tabs">
+                <button type="button" onclick="setModalType('cartao')" id="m-tab-cartao" class="modal-tab-btn active">Cartão/Despesa</button>
+                <button type="button" onclick="setModalType('partilha')" id="m-tab-partilha" class="modal-tab-btn">Partilha</button>
+            </div>
+            <form id="modal-form" onsubmit="saveRecord(event)">
+                <div id="form-fields"></div>
+                <button type="submit" class="btn-submit">Confirmar Guardar</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"><span id="toast-msg">Salvo!</span></div>
+
+    <!-- SCRIPT FINANÇAS -->
+    <script>
+        // --- BASE DE DADOS ORIGINAL COM DIAS DE VENCIMENTO CONSTANTES ---
+        const initialCards = [
+            { id: '1', name: 'NIO', totalBill: 2779.00, dueDay: 10 },
+            { id: '2', name: 'MERCADO PAGO', totalBill: 2120.00, dueDay: 10 },
+            { id: '3', name: 'SANTANDER', totalBill: 100.00, dueDay: 1 },
+            { id: '4', name: 'MARISA', totalBill: 247.00, dueDay: 12 },
+            { id: '5', name: 'PICPAY', totalBill: 1031.78, dueDay: 10 },
+            { id: '6', name: 'CARRO', totalBill: 2398.00, dueDay: 27 },
+            { id: '7', name: 'JOGO', totalBill: 150.00, dueDay: 1 },
+            { id: '8', name: 'AJUSTE', totalBill: -1500.00, dueDay: 1 }
+        ];
+
+        const initialLoans = [
+            { id: '1', name: 'ANGELA', MP: 799.00, PP: 1678.00, SAN: 0, NIO: 0 },
+            { id: '2', name: 'CARNAUBA', MP: 234.00, PP: 0, SAN: 0, NIO: 0 },
+            { id: '3', name: 'ROMILDA', MP: 0, PP: 0, SAN: 0, NIO: 355.00 },
+            { id: '4', name: 'KAIQUE', MP: 528.00, PP: 0, SAN: 0, NIO: 0 },
+            { id: '5', name: 'LETICIA', MP: 161.00, PP: 136.00, SAN: 0, NIO: 0 }
+        ];
+
+        let simulatedTodayStr = localStorage.getItem('simulated_today') || '2026-05-19';
+
+        let state = {
+            cards: JSON.parse(localStorage.getItem('w_cards_exact_v2')) || initialCards,
+            loans: JSON.parse(localStorage.getItem('w_loans_exact_v2')) || initialLoans,
+            currentTab: 'dashboard',
+            modalType: 'cartao',
+            editingId: null
+        };
+
+        function saveState() {
+            localStorage.setItem('w_cards_exact_v2', JSON.stringify(state.cards));
+            localStorage.setItem('w_loans_exact_v2', JSON.stringify(state.loans));
+            localStorage.setItem('simulated_today', simulatedTodayStr);
+        }
+
+        function formatBRL(val) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        function updateSimulatedToday(val) {
+            simulatedTodayStr = val;
+            saveState();
+            const dateObj = new Date(simulatedTodayStr + 'T00:00:00');
+            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            document.getElementById('current-badge-date').textContent = `${monthNames[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
+            renderActiveTab();
+        }
+
+        // --- FUNÇÃO PARA CALCULAR A DATA DE VENCIMENTO DINÂMICA (ROLOVER DE MÊS) ---
+        function getNextDueDate(dueDay, today) {
+            let year = today.getFullYear();
+            let month = today.getMonth(); // 0-11 (Janeiro-Dezembro)
+            
+            // Criar data candidata para o mês atual
+            let candidate = new Date(year, month, dueDay, 0, 0, 0);
+            
+            // Se o dia do vencimento já passou (ou é hoje), rola automaticamente para o mês seguinte
+            if (candidate < today) {
+                candidate = new Date(year, month + 1, dueDay, 0, 0, 0);
+            }
+            return candidate;
+        }
+
+        function runCalculations() {
+            const today = new Date(simulatedTodayStr + 'T00:00:00');
+            const cardLoans = { NIO: 0, MP: 0, SAN: 0, PP: 0 };
+
+            state.loans.forEach(l => {
+                cardLoans.MP += parseFloat(l.MP || 0);
+                cardLoans.PP += parseFloat(l.PP || 0);
+                cardLoans.SAN += parseFloat(l.SAN || 0);
+                cardLoans.NIO += parseFloat(l.NIO || 0);
+            });
+
+            let totalWeeklyMeta = 0;
+
+            const processedCards = state.cards.map(c => {
+                let loansOnThisCard = 0;
+                const nameUpper = c.name.toUpperCase();
+                
+                if (nameUpper.includes('NIO')) loansOnThisCard = cardLoans.NIO;
+                else if (nameUpper.includes('MERCADO') || nameUpper.includes('MP')) loansOnThisCard = cardLoans.MP;
+                else if (nameUpper.includes('SANTANDER') || nameUpper.includes('SAN')) loansOnThisCard = cardLoans.SAN;
+                else if (nameUpper.includes('PICPAY') || nameUpper.includes('PP')) loansOnThisCard = cardLoans.PP;
+
+                const myShare = c.totalBill - loansOnThisCard;
+                
+                // Calcula automaticamente o vencimento completo (virada do mês automática)
+                const computedDueDate = getNextDueDate(c.dueDay, today);
+                
+                // Diferença em milissegundos convertida para dias de forma exata (decimal)
+                const diffTime = computedDueDate - today;
+                const diffDays = diffTime / (1000 * 60 * 60 * 24);
+                
+                // Semanas exatas em decimal (sem arredondamento)
+                let calculatedWeeks = diffDays / 7;
+                if (calculatedWeeks <= 0) calculatedWeeks = 0.1; // Evita divisão por zero
+
+                const weeklyContribution = myShare / calculatedWeeks;
+                totalWeeklyMeta += weeklyContribution;
+
+                return {
+                    ...c, 
+                    loansTotal: loansOnThisCard, 
+                    myShare, 
+                    computedDueDate,
+                    daysRemaining: diffDays, 
+                    calculatedWeeks, 
+                    weeklyTarget: weeklyContribution
+                };
+            });
+
+            const baseWeeklyMeta = totalWeeklyMeta;
+            const fuelAddition = totalWeeklyMeta * 0.25;
+            const totalWeeklyMetaWithFuel = totalWeeklyMeta * 1.25;
+
+            return { 
+                processedCards, 
+                baseWeeklyMeta,
+                fuelAddition,
+                totalWeeklyMeta: totalWeeklyMetaWithFuel, 
+                cardLoans 
+            };
+        }
+
+        function switchTab(tab) {
+            state.currentTab = tab;
+            ['nav-dashboard', 'nav-cartoes', 'nav-partilhas'].forEach(id => {
+                document.getElementById(id).classList.remove('active');
+            });
+            document.getElementById(`nav-${tab}`).classList.add('active');
+            renderActiveTab();
+        }
+
+        function renderActiveTab() {
+            const container = document.getElementById('main-content');
+            const data = runCalculations();
+            container.innerHTML = '';
+
+            if (state.currentTab === 'dashboard') {
+                renderDashboard(container, data);
+            } else if (state.currentTab === 'cartoes') {
+                renderCartoes(container, data);
+            } else if (state.currentTab === 'partilhas') {
+                renderPartilhas(container, data);
+            }
+        }
+
+        function renderDashboard(container, data) {
+            const totalFaturasTotal = state.cards.reduce((sum, c) => sum + c.totalBill, 0);
+            const totalEmprestimos = Object.values(data.cardLoans).reduce((a, b) => a + b, 0);
+
+            container.innerHTML = `
+                <!-- VALOR DA META SEMANAL DINÂMICA COM COMBUSTÍVEL -->
+                <div class="meta-card">
+                    <span class="meta-card-label">Minha Meta Semanal (Com Combustível)</span>
+                    <h2 class="meta-card-value">${formatBRL(data.totalWeeklyMeta)}</h2>
+                    <p class="meta-card-desc">Cálculo contínuo com acréscimo de +25% para combustível.</p>
+                </div>
+                <div class="sim-container">
+                    <span class="sim-title">Dia de Hoje:</span>
+                    <input type="date" class="sim-input" value="${simulatedTodayStr}" onchange="updateSimulatedToday(this.value)">
+                </div>
+                
+                <!-- DETALHES DA COMPOSIÇÃO DA META -->
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <span class="summary-label">Meta Faturas (Base)</span>
+                        <span class="summary-value" style="font-size: 15px; color: #f1f5f9;">${formatBRL(data.baseWeeklyMeta)}</span>
+                    </div>
+                    <div class="summary-card">
+                        <span class="summary-label">Combustível (+25%)</span>
+                        <span class="summary-value" style="font-size: 15px; color: var(--secondary);">${formatBRL(data.fuelAddition)}</span>
+                    </div>
+                </div>
+
+                <div class="summary-grid">
+                    <div class="summary-card"><span class="summary-label">Faturas Totais</span><span class="summary-value">${formatBRL(totalFaturasTotal)}</span></div>
+                    <div class="summary-card"><span class="summary-label">Total Devedores</span><span class="summary-value" style="color: var(--secondary);">${formatBRL(totalEmprestimos)}</span></div>
+                </div>
+                <div class="list-container">
+                    <h3 class="section-title">Esforço Semanal Requerido</h3>
+                    ${data.processedCards.map(c => {
+                        let color = c.daysRemaining < 0 ? 'rose' : (c.daysRemaining <= 7 ? 'amber' : 'green');
+                        return `
+                            <div class="item-card" style="flex-direction: row; justify-content: space-between; align-items: center; padding: 14px 16px;">
+                                <div>
+                                    <div class="item-title-wrapper"><span class="status-dot ${color}"></span><span class="item-title">${c.name}</span></div>
+                                    <span class="item-subtitle" style="display: block; margin-left: 18px;">${c.calculatedWeeks.toFixed(2)} sem (${Math.ceil(c.daysRemaining)} dias)</span>
+                                </div>
+                                <div style="text-align: right;">
+                                    <span class="item-value-main" style="color: var(--primary); font-size: 15px; font-weight: 800;">${formatBRL(c.weeklyTarget)}/sem</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function renderCartoes(container, data) {
+            container.innerHTML = `
+                <div class="list-container">
+                    ${data.processedCards.map(c => `
+                        <div class="item-card">
+                            <div class="item-card-header">
+                                <div>
+                                    <h3 class="item-title">${c.name}</h3>
+                                    <span class="item-subtitle">Próximo Vencimento: ${c.computedDueDate.toLocaleDateString('pt-PT')} (Dia ${c.dueDay})</span>
+                                </div>
+                                <div class="item-value-side"><span class="item-value-label">Total</span><span class="item-value-main">${formatBRL(c.totalBill)}</span></div>
+                            </div>
+                            <div class="info-grid-3">
+                                <div class="info-cell"><span class="info-grid-label">Parcerias</span><span class="info-grid-value teal">${formatBRL(c.loansTotal)}</span></div>
+                                <div class="info-cell"><span class="info-grid-label">Líquido</span><span class="info-grid-value">${formatBRL(c.myShare)}</span></div>
+                                <div class="info-cell"><span class="info-grid-label">Semanas</span><span class="info-grid-value emerald">${c.calculatedWeeks.toFixed(2)}s</span></div>
+                            </div>
+                            <div class="card-actions">
+                                <span>Meta Base: <strong style="color: var(--primary);">${formatBRL(c.weeklyTarget)}</strong></span>
+                                <div class="action-button-group">
+                                    <button onclick="editCard('${c.id}')" class="btn-action edit">Editar</button>
+                                    <button onclick="deleteCard('${c.id}')" class="btn-action delete">Remover</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderPartilhas(container, data) {
+            container.innerHTML = `
+                <div class="list-container">
+                    ${state.loans.map(l => {
+                        const total = parseFloat(l.MP || 0) + parseFloat(l.PP || 0) + parseFloat(l.SAN || 0) + parseFloat(l.NIO || 0);
+                        return `
+                            <div class="item-card">
+                                <div class="item-card-header">
+                                    <h3 class="item-title">${l.name}</h3>
+                                    <span class="item-value-main" style="color: var(--secondary);">${formatBRL(total)}</span>
+                                </div>
+                                <div class="info-grid">
+                                    <div class="info-row"><span>MP:</span><span>${formatBRL(l.MP)}</span></div>
+                                    <div class="info-row"><span>PicPay:</span><span>${formatBRL(l.PP)}</span></div>
+                                    <div class="info-row"><span>Santander:</span><span>${formatBRL(l.SAN)}</span></div>
+                                    <div class="info-row"><span>Nio:</span><span>${formatBRL(l.NIO)}</span></div>
+                                </div>
+                                <div class="card-actions" style="justify-content: flex-end;">
+                                    <div class="action-button-group">
+                                        <button onclick="editLoan('${l.id}')" class="btn-action edit">Editar</button>
+                                        <button onclick="deleteLoan('${l.id}')" class="btn-action delete">Remover</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function openAddModal() { state.editingId = null; setModalType('cartao'); document.getElementById('modal').classList.add('open'); }
+        function closeAddModal() { document.getElementById('modal').classList.remove('open'); }
+        function handleOverlayClick(e) { if(e.target.id === 'modal') closeAddModal(); }
+
+        function setModalType(type) {
+            state.modalType = type;
+            document.getElementById('m-tab-cartao').classList.toggle('active', type === 'cartao');
+            document.getElementById('m-tab-partilha').classList.toggle('active', type === 'partilha');
+            
+            const fields = document.getElementById('form-fields');
+            if (type === 'cartao') {
+                fields.innerHTML = `
+                    <div class="form-group"><label class="form-label">Nome do Cartão/Despesa</label><input type="text" id="c-name" required class="form-control"></div>
+                    <div class="form-grid-2">
+                        <div class="form-group"><label class="form-label">Fatura (R$)</label><input type="number" step="0.01" id="c-bill" required class="form-control"></div>
+                        <div class="form-group"><label class="form-label">Dia do Vencimento (1-31)</label><input type="number" min="1" max="31" id="c-day" required class="form-control" placeholder="Ex: 10"></div>
+                    </div>`;
+            } else {
+                fields.innerHTML = `
+                    <div class="form-group"><label class="form-label">Nome do Devedor</label><input type="text" id="l-name" required class="form-control"></div>
+                    <div class="form-grid-2">
+                        <div class="form-group"><label class="form-label">Mercado Pago</label><input type="number" step="0.01" id="l-mp" class="form-control" value="0"></div>
+                        <div class="form-group"><label class="form-label">PicPay</label><input type="number" step="0.01" id="l-pp" class="form-control" value="0"></div>
+                        <div class="form-group"><label class="form-label">Santander</label><input type="number" step="0.01" id="l-san" class="form-control" value="0"></div>
+                        <div class="form-group"><label class="form-label">Nio</label><input type="number" step="0.01" id="l-nio" class="form-control" value="0"></div>
+                    </div>`;
+            }
+        }
+
+        function saveRecord(e) {
+            e.preventDefault();
+            if (state.modalType === 'cartao') {
+                const name = document.getElementById('c-name').value.toUpperCase();
+                const totalBill = parseFloat(document.getElementById('c-bill').value);
+                const dueDay = parseInt(document.getElementById('c-day').value);
+                if(state.editingId) {
+                    const idx = state.cards.findIndex(c => c.id === state.editingId);
+                    state.cards[idx] = { id: state.editingId, name, totalBill, dueDay };
+                } else {
+                    state.cards.push({ id: Date.now().toString(), name, totalBill, dueDay });
+                }
+                switchTab('cartoes');
+            } else {
+                const name = document.getElementById('l-name').value.toUpperCase();
+                const MP = parseFloat(document.getElementById('l-mp').value) || 0;
+                const PP = parseFloat(document.getElementById('l-pp').value) || 0;
+                const SAN = parseFloat(document.getElementById('l-san').value) || 0;
+                const NIO = parseFloat(document.getElementById('l-nio').value) || 0;
+                if(state.editingId) {
+                    const idx = state.loans.findIndex(l => l.id === state.editingId);
+                    state.loans[idx] = { id: state.editingId, name, MP, PP, SAN, NIO };
+                } else {
+                    state.loans.push({ id: Date.now().toString(), name, MP, PP, SAN, NIO });
+                }
+                switchTab('partilhas');
+            }
+            saveState();
+            closeAddModal();
+            showToast('Guardado com sucesso!');
+        }
+
+        function editCard(id) {
+            const c = state.cards.find(item => item.id === id);
+            if (!c) return;
+            openAddModal(); state.editingId = id; setModalType('cartao');
+            document.getElementById('c-name').value = c.name;
+            document.getElementById('c-bill').value = c.totalBill;
+            document.getElementById('c-day').value = c.dueDay;
+        }
+
+        function deleteCard(id) {
+            if (confirm('Remover despesa?')) { state.cards = state.cards.filter(i => i.id !== id); saveState(); renderActiveTab(); }
+        }
+
+        function editLoan(id) {
+            const l = state.loans.find(item => item.id === id);
+            if (!l) return;
+            openAddModal(); state.editingId = id; setModalType('partilha');
+            document.getElementById('l-name').value = l.name;
+            document.getElementById('l-mp').value = l.MP;
+            document.getElementById('l-pp').value = l.PP;
+            document.getElementById('l-san').value = l.SAN;
+            document.getElementById('l-nio').value = l.NIO;
+        }
+
+        function deleteLoan(id) {
+            if (confirm('Remover devedor?')) { state.loans = state.loans.filter(i => i.id !== id); saveState(); renderActiveTab(); }
+        }
+
+        window.onload = function() { updateSimulatedToday(simulatedTodayStr); };
+    </script>
+</body>
+</html>

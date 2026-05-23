@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Meta Semanal - Finanças Privadas</title>
-    <!-- Biblioteca SheetJS para geração de arquivos Excel nativos diretamente no navegador -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.mini.min.js"></script>
     <style>
         /* --- ESTILOS NATIVOS CSS DE ALTO DESEMPENHO (Premium Dark Theme) --- */
@@ -367,7 +366,7 @@
         .info-row span:first-child { color: var(--text-muted); }
         .info-row span:last-child { font-weight: 700; color: #cbd5e1; }
 
-        /* --- CORREÇÃO DE SOBREPOSIÇÃO E BOTÕES (CARD ACTIONS) --- */
+        /* --- CONTROLES DE AÇÕES DOS CARTÕES --- */
         .card-actions {
             display: flex;
             flex-direction: column;
@@ -629,13 +628,12 @@
             <div class="header-logo">$</div>
             <div>
                 <h1 class="header-title">Meta Semanal</h1>
-                <p class="header-subtitle">Planeamento Exato por Data</p>
+                <p class="header-subtitle">Planejamento Exato por Data</p>
             </div>
         </div>
         <div class="header-badge" id="current-badge-date">Mês Corrente</div>
     </header>
 
-    <!-- Indicador de Segurança Local com Botão Exportar Excel -->
     <div id="sync-status-banner" class="sync-banner">
         <div class="sync-banner-text">
             <span class="sync-dot"></span>
@@ -650,8 +648,7 @@
     </div>
 
     <main id="main-content">
-        <!-- Injetado Dinamicamente -->
-    </main>
+        </main>
 
     <nav>
         <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn active">
@@ -675,11 +672,10 @@
         </button>
     </nav>
 
-    <!-- MODAL -->
     <div id="modal" class="modal-overlay" onclick="handleOverlayClick(event)">
         <div class="modal-container">
             <div class="modal-header">
-                <h3 class="modal-title" id="modal-title">Novo Registo</h3>
+                <h3 class="modal-title" id="modal-title">Novo Registro</h3>
                 <button onclick="closeAddModal()" class="modal-close">
                     <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
@@ -690,16 +686,15 @@
             </div>
             <form id="modal-form" onsubmit="saveRecord(event)">
                 <div id="form-fields"></div>
-                <button type="submit" class="btn-submit">Confirmar Guardar</button>
+                <button type="submit" class="btn-submit">Confirmar Salvar</button>
             </form>
         </div>
     </div>
 
-    <!-- MODAL DE ADIANTAMENTO RÁPIDO (DÉBITO) -->
     <div id="pay-modal" class="modal-overlay" onclick="handlePayOverlayClick(event)">
         <div class="modal-container" style="border-radius: 24px; padding: 24px;">
             <div class="modal-header">
-                <h3 class="modal-title">Registar Adiantamento (Débito/Pix)</h3>
+                <h3 class="modal-title">Registrar Adiantamento (Débito/Pix)</h3>
                 <button onclick="closePayModal()" class="modal-close">
                     <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
@@ -717,13 +712,12 @@
 
     <div id="toast" class="toast"><span id="toast-msg">Salvo!</span></div>
 
-    <!-- SCRIPT FINANÇAS LOCAIS -->
     <script>
         // 🛡️ DADOS INICIAIS VAZIOS (Para privacidade por omissão no seu GitHub público)
         const initialCards = [];
         const initialLoans = [];
         const initialHistory = [
-            { id: 'sys-init', date: new Date().toLocaleString('pt-PT'), type: 'criacao', description: 'Sistema de Livro Diário inicializado com sucesso.', amount: 0 }
+            { id: 'sys-init', date: new Date().toLocaleString('pt-BR'), type: 'criacao', description: 'Sistema de Livro Diário inicializado com sucesso.', amount: 0 }
         ];
 
         // Estado carregado diretamente do armazenamento local (localStorage)
@@ -757,7 +751,7 @@
 
         // Função para acrescentar entradas no Livro Diário de forma cronológica
         function logToJournal(type, description, amount) {
-            const timestamp = new Date().toLocaleString('pt-PT');
+            const timestamp = new Date().toLocaleString('pt-BR');
             state.history.unshift({
                 id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
                 date: timestamp,
@@ -923,14 +917,12 @@
             const marginPercent = Math.round(state.safetyMargin * 100);
 
             container.innerHTML = `
-                <!-- VALOR DA META SEMANAL DINÂMICA COM MARGEM DE SEGURANÇA -->
                 <div class="meta-card">
                     <span class="meta-card-label">Meta Semanal (Com Margem)</span>
                     <h2 class="meta-card-value">${formatBRL(data.totalWeeklyMeta)}</h2>
                     <p class="meta-card-desc">Cálculo contínuo com acréscimo de +${marginPercent}% de margem.</p>
                 </div>
                 
-                <!-- CONTROLE INTERATIVO DA MARGEM DE SEGURANÇA -->
                 <div class="margin-controller-container">
                     <span class="margin-controller-label">Margem de Segurança:</span>
                     <div class="margin-controls-group">
@@ -940,7 +932,6 @@
                     </div>
                 </div>
 
-                <!-- DETALHES DA COMPOSIÇÃO DA META -->
                 <div class="summary-grid">
                     <div class="summary-card">
                         <span class="summary-label">Meta Faturas (Base)</span>
@@ -971,7 +962,7 @@
                     <h3 class="section-title">Esforço Semanal Requerido</h3>
                     ${state.cards.length === 0 ? `
                         <div class="item-card" style="text-align: center; padding: 24px; color: var(--text-muted); border: 1px dashed var(--border-color);">
-                            Nenhum cartão adicionado. Clica no botão "+" abaixo para começares!
+                            Nenhum cartão adicionado. Clique no botão "+" abaixo para começar!
                         </div>
                     ` : data.processedCards.map(c => {
                         let color = c.daysRemaining < 0 ? 'rose' : (c.daysRemaining <= 7 ? 'amber' : 'green');
@@ -996,14 +987,14 @@
                 <div class="list-container">
                     ${state.cards.length === 0 ? `
                         <div class="item-card" style="text-align: center; padding: 24px; color: var(--text-muted); border: 1px dashed var(--border-color);">
-                            Nenhum cartão cadastrado. Clica no botão "+" abaixo para adicionares o teu primeiro cartão!
+                            Nenhum cartão cadastrado. Clique no botão "+" abaixo para adicionar o seu primeiro cartão!
                         </div>
                     ` : data.processedCards.map(c => `
                         <div class="item-card">
                             <div class="item-card-header">
                                 <div>
                                     <h3 class="item-title">${c.name}</h3>
-                                    <span class="item-subtitle">Próximo Vencimento: ${c.computedDueDate.toLocaleDateString('pt-PT')} (Dia ${c.dueDay})</span>
+                                    <span class="item-subtitle">Próximo Vencimento: ${c.computedDueDate.toLocaleDateString('pt-BR')} (Dia ${c.dueDay})</span>
                                 </div>
                                 <div class="item-value-side"><span class="item-value-label">Total</span><span class="item-value-main">${formatBRL(c.totalBill)}</span></div>
                             </div>
@@ -1031,7 +1022,7 @@
                 <div class="list-container">
                     ${state.loans.length === 0 ? `
                         <div class="item-card" style="text-align: center; padding: 24px; color: var(--text-muted); border: 1px dashed var(--border-color);">
-                            Nenhum registo de partilha. Clica no botão "+" e muda para a aba de "Partilha" para registares quem te deve!
+                            Nenhuma partilha registrada. Clique no botão "+" e mude para a aba de "Partilha" para registrar quem te deve!
                         </div>
                     ` : state.loans.map(l => {
                         const total = parseFloat(l.MP || 0) + parseFloat(l.PP || 0) + parseFloat(l.SAN || 0) + parseFloat(l.NIO || 0);
@@ -1064,13 +1055,13 @@
         function renderDiario(container) {
             container.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                    <h3 class="section-title" style="margin: 0;">Registo Cronológico de Ações</h3>
+                    <h3 class="section-title" style="margin: 0;">Registro Cronológico de Ações</h3>
                     <button class="btn-action delete" style="padding: 6px 12px; font-size: 10px; min-width: auto; flex: none" onclick="clearJournal()">Limpar Diário</button>
                 </div>
                 <div class="list-container">
                     ${state.history.length === 0 ? `
                         <div class="item-card" style="text-align: center; padding: 24px; color: var(--text-muted); border: 1px dashed var(--border-color);">
-                            Nenhum registo no diário ainda. Todas as tuas despesas e pagamentos aparecerão aqui automaticamente!
+                            Nenhum registro no diário ainda. Todas as suas despesas e pagamentos aparecerão aqui automaticamente!
                         </div>
                     ` : state.history.map(h => `
                         <div class="item-card" style="padding: 14px; gap: 8px;">
@@ -1092,9 +1083,9 @@
 
         // Limpar o diário com confirmação
         window.clearJournal = function() {
-            if (confirm("Tem a certeza de que deseja limpar permanentemente todo o histórico do Livro Diário?")) {
+            if (confirm("Tem certeza de que deseja limpar permanentemente todo o histórico do Livro Diário?")) {
                 state.history = [
-                    { id: 'sys-init', date: new Date().toLocaleString('pt-PT'), type: 'criacao', description: 'Livro Diário limpo pelo utilizador.', amount: 0 }
+                    { id: 'sys-init', date: new Date().toLocaleString('pt-BR'), type: 'criacao', description: 'Livro Diário limpo pelo usuário.', amount: 0 }
                 ];
                 saveState();
                 renderActiveTab();
@@ -1116,7 +1107,7 @@
                 // 1. Criar dados para a primeira aba: "Resumo & Cartões"
                 const summaryHeader = [
                     ["GESTOR FINANCEIRO - METAS SEMANAIS"],
-                    ["Data da Exportação", new Date().toLocaleDateString('pt-PT')],
+                    ["Data da Exportação", new Date().toLocaleDateString('pt-BR')],
                     [],
                     ["MÉTRICAS GERAIS"],
                     ["Minha Meta Semanal (Com Margem)", calcs.totalWeeklyMeta],
@@ -1135,7 +1126,7 @@
                         c.name,
                         c.totalBill,
                         c.dueDay,
-                        c.computedDueDate.toLocaleDateString('pt-PT'),
+                        c.computedDueDate.toLocaleDateString('pt-BR'),
                         c.loansTotal,
                         c.prepaidAmount,
                         c.myShare,
@@ -1182,8 +1173,8 @@
 
                 // 3. Criar dados para a terceira aba: "Livro Diário"
                 const journalHeader = [
-                    ["LIVRO DIÁRIO - REGISTO DE TRANSAÇÕES"],
-                    ["Ficheiro auditado cronologicamente"],
+                    ["LIVRO DIÁRIO - REGISTRO DE TRANSAÇÕES"],
+                    ["Arquivo auditado cronologicamente"],
                     [],
                     ["Data/Hora", "Tipo de Ação", "Descrição do Evento", "Valor Associado (R$)"]
                 ];
@@ -1200,12 +1191,19 @@
                 const wsJournal = XLSX.utils.aoa_to_sheet(journalHeader);
                 XLSX.utils.book_append_sheet(wb, wsJournal, "Livro Diário");
 
-                // Gerar e descarregar o ficheiro .xlsx completo
-                XLSX.writeFile(wb, `Gestor_Financas_Completo_${new Date().toISOString().split('T')[0]}.xlsx`);
-                showToast("Ficheiro Excel (3 abas) exportado com sucesso!");
+                // Configuração da data no formato dd_mm_aaaa para o nome do arquivo
+                const d = new Date();
+                const day = String(d.getDate()).padStart(2, '0');
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const year = d.getFullYear();
+                const formattedDate = `${day}_${month}_${year}`;
+
+                // Gerar e descarregar o arquivo .xlsx completo com a nova formatação de data
+                XLSX.writeFile(wb, `Gestor_Financas_Completo_${formattedDate}.xlsx`);
+                showToast("Arquivo Excel (3 abas) exportado com sucesso!");
             } catch (err) {
                 console.error("Erro na exportação Excel:", err);
-                showToast("Erro ao gerar o ficheiro Excel.");
+                showToast("Erro ao gerar o arquivo Excel.");
             }
         }
 
@@ -1260,7 +1258,7 @@
                     state.cards.push({ id: Date.now().toString(), name, totalBill, dueDay, prepaid });
                     logToJournal('criacao', `Criação do cartão/despesa ${name} com vencimento no dia ${dueDay}.`, totalBill);
                     if (prepaid > 0) {
-                        logToJournal('adiantamento', `Adiantamento registado na criação do cartão ${name}.`, prepaid);
+                        logToJournal('adiantamento', `Adiantamento registrado na criação do cartão ${name}.`, prepaid);
                     }
                 }
                 switchTab('cartoes');
@@ -1278,13 +1276,13 @@
                     logToJournal('edicao', `Atualização da partilha de ${name}. Total devedor: ${formatBRL(sum)}.`, sum);
                 } else {
                     state.loans.push({ id: Date.now().toString(), name, MP, PP, SAN, NIO });
-                    logToJournal('criacao', `Nova partilha registada para ${name}. Valor em dívida: ${formatBRL(sum)}.`, sum);
+                    logToJournal('criacao', `Nova partilha registrada para ${name}. Valor em dívida: ${formatBRL(sum)}.`, sum);
                 }
                 switchTab('partilhas');
             }
             saveState();
             closeAddModal();
-            showToast('Guardado com sucesso!');
+            showToast('Salvo com sucesso!');
         }
 
         window.editCard = function(id) {
@@ -1322,7 +1320,7 @@
             const loanObj = state.loans.find(i => i.id === id);
             if (loanObj && confirm(`Remover devedor ${loanObj.name}?`)) {
                 const total = parseFloat(loanObj.MP || 0) + parseFloat(loanObj.PP || 0) + parseFloat(loanObj.SAN || 0) + parseFloat(loanObj.NIO || 0);
-                logToJournal('remocao', `Remoção do registo de devedor: ${loanObj.name}.`, -total);
+                logToJournal('remocao', `Remoção do registro de devedor: ${loanObj.name}.`, -total);
                 state.loans = state.loans.filter(i => i.id !== id);
                 saveState();
                 renderActiveTab();

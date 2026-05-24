@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Meta Semanal - Finanças Privadas</title>
-    <!-- Biblioteca SheetJS para geração de arquivos Excel nativos diretamente no navegador -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.mini.min.js"></script>
     <style>
         /* --- ESTILOS NATIVOS CSS DE ALTO DESEMPENHO (Premium Dark Theme) --- */
@@ -91,7 +90,6 @@
             border: 1px solid rgba(59, 130, 246, 0.25);
         }
 
-        /* Indicador de Segurança Local com Botão Exportar Excel */
         .sync-banner {
             background-color: #1a2333;
             border-bottom: 1px solid var(--border-color);
@@ -146,7 +144,6 @@
             margin: 0 auto;
         }
 
-        /* --- CARDS & METRICAS --- */
         .meta-card {
             background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
             border-radius: 20px;
@@ -258,7 +255,6 @@
             margin: 24px 0 12px;
         }
 
-        /* --- LISTS & ITEM CARDS --- */
         .list-container {
             display: flex;
             flex-direction: column;
@@ -355,7 +351,6 @@
         .info-row span:first-child { color: var(--text-muted); }
         .info-row span:last-child { font-weight: 700; color: #cbd5e1; }
 
-        /* --- CONTROLES DE AÇÕES DOS CARTÕES --- */
         .card-actions {
             display: flex;
             flex-direction: column;
@@ -418,7 +413,6 @@
             color: white;
         }
 
-        /* --- NAV BAR --- */
         nav {
             background-color: var(--card-bg);
             border-top: 1px solid var(--border-color);
@@ -483,7 +477,6 @@
             transform: scale(0.9);
         }
 
-        /* --- MODAL --- */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -604,7 +597,6 @@
             margin-top: 10px;
         }
 
-        /* --- TOAST --- */
         .toast {
             position: fixed;
             bottom: 88px;
@@ -627,7 +619,6 @@
             transform: translateX(-50%) translateY(0);
         }
 
-        /* --- DIÁRIO DE EVENTOS --- */
         .log-tag {
             font-size: 10px;
             font-weight: 700;
@@ -655,7 +646,6 @@
         <div class="header-badge" id="current-badge-date">Mês Corrente</div>
     </header>
 
-    <!-- Indicador de Segurança Local com Botão Exportar Excel -->
     <div id="sync-status-banner" class="sync-banner">
         <div class="sync-banner-text">
             <span class="sync-dot"></span>
@@ -668,8 +658,7 @@
     </div>
 
     <main id="main-content">
-        <!-- Injetado Dinamicamente -->
-    </main>
+        </main>
 
     <nav>
         <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn active">
@@ -697,7 +686,6 @@
         </button>
     </nav>
 
-    <!-- MODAL -->
     <div id="modal" class="modal-overlay" onclick="handleOverlayClick(event)">
         <div class="modal-container">
             <div class="modal-header">
@@ -717,7 +705,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE ADIANTAMENTO RÁPIDO (DÉBITO) -->
     <div id="pay-modal" class="modal-overlay" onclick="handlePayOverlayClick(event)">
         <div class="modal-container" style="border-radius: 24px; padding: 24px;">
             <div class="modal-header">
@@ -739,7 +726,6 @@
 
     <div id="toast" class="toast"><span id="toast-msg">Salvo!</span></div>
 
-    <!-- SCRIPT FINANÇAS LOCAIS -->
     <script>
         const initialCards = [];
         const initialLoans = [];
@@ -747,14 +733,12 @@
             { id: 'sys-init', date: new Date().toLocaleString('pt-BR'), type: 'criacao', description: 'Sistema de Livro Diário inicializado com sucesso.', amount: 0 }
         ];
 
-        // Estado carregado do localStorage
         let state = {
             cards: JSON.parse(localStorage.getItem('cards')) || initialCards,
             loans: JSON.parse(localStorage.getItem('loans')) || initialLoans,
             history: JSON.parse(localStorage.getItem('history')) || initialHistory,
             safetyMargin: parseFloat(localStorage.getItem('safetyMargin')) || 0.15,
             
-            // Campos do sistema de salário
             salaryValue: parseFloat(localStorage.getItem('salaryValue')) || 0,
             salaryDay: parseInt(localStorage.getItem('salaryDay')) || 1,
 
@@ -764,7 +748,6 @@
             editingId: null
         };
 
-        // Salvar estado localmente
         function saveState() {
             localStorage.setItem('cards', JSON.stringify(state.cards));
             localStorage.setItem('loans', JSON.stringify(state.loans));
@@ -821,7 +804,6 @@
             renderActiveTab();
         }
 
-        // Retorna o somatório de coparticipações/empréstimos a terceiros de um grupo de cartão
         function getLoanTotal(l) {
             if (!l) return 0;
             return parseFloat(l.Santander || 0) + 
@@ -830,7 +812,6 @@
                    parseFloat(l.PicPay || 0);
         }
 
-        // Retorna quantos dias faltam para o próximo salário do dia configurado
         function getDaysUntilPayday() {
             const [todayYear, todayMonth, todayDay] = simulatedTodayStr.split('-').map(Number);
             const today = new Date(todayYear, todayMonth - 1, todayDay);
@@ -843,7 +824,6 @@
             return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         }
 
-        // --- MOTOR FINANCEIRO COM ABATIMENTO DINÂMICO E AUTOMÁTICO DE SALÁRIO ---
         function calculateWeeklyMetas() {
             const [todayYear, todayMonth, todayDay] = simulatedTodayStr.split('-').map(Number);
             const today = new Date(todayYear, todayMonth - 1, todayDay);
@@ -866,7 +846,7 @@
                 const diffTime = computedDueDate.getTime() - today.getTime();
                 const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                // Busca robusta de partilhas ligadas a este cartão pelo nome do cartão selecionado
+                // Busca as partilhas associadas a este cartão de forma insensível a maiúsculas/minúsculas
                 const loansForCard = state.loans.filter(l => l.name.trim().toLowerCase() === card.name.trim().toLowerCase());
                 let loansTotal = 0;
                 loansForCard.forEach(l => {
@@ -876,10 +856,7 @@
                 const totalBill = parseFloat(card.totalBill || 0);
                 const prepaidAmount = parseFloat(card.prepaid || 0);
                 
-                // CÁLCULO EXATO DA PARTE DO USUÁRIO: Fatura total - Coparticipação - Adiantamentos
                 const myShare = Math.max(0, totalBill - loansTotal - prepaidAmount);
-
-                // Meta Semanal baseada na parte líquida restante
                 const weeksRemaining = Math.max(1, daysRemaining / 7);
                 const weeklyEffort = myShare / weeksRemaining;
 
@@ -900,25 +877,17 @@
                 };
             });
 
-            // Meta Semanal base de todos os cartões somados
             const baseWeeklyMeta = processedCards.reduce((sum, item) => sum + item.weeklyEffort, 0);
-            
-            // Meta Semanal com margem de segurança aplicada
             const totalWeeklyMetaWithMargin = baseWeeklyMeta * (1 + state.safetyMargin);
 
-            // --- CÁLCULO DINÂMICO DO DESCONTO SEMANAL DO SALÁRIO ---
             const daysToPayday = getDaysUntilPayday();
             let calculatedWeeklySalaryDiscount = 0;
 
             if (state.salaryValue > 0) {
-                // Converte dias restantes em semanas inteiras/fração de semanas
                 const weeksToPayday = Math.max(1, daysToPayday / 7);
-                
-                // À medida que weeksToPayday diminui (ex: de 4 para 3, para 2, para 1), o desconto semanal aumenta automaticamente!
                 calculatedWeeklySalaryDiscount = state.salaryValue / weeksToPayday;
             }
 
-            // APLICAÇÃO DO DESCONTO ACELERADO DO SALÁRIO ANTES DELE CHEGAR
             const finalNetWeeklyMeta = Math.max(0, totalWeeklyMetaWithMargin - calculatedWeeklySalaryDiscount);
 
             return {
@@ -934,7 +903,6 @@
             };
         }
 
-        // --- GESTÃO DE MENU ---
         window.switchTab = function(tabName) {
             state.activeTab = tabName;
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
@@ -1106,39 +1074,69 @@
             `;
         }
 
-        // --- RENDER PARTILHAS ---
+        // --- RENDER PARTILHAS (AGRUPADO INTELIGENTE POR PESSOA) ---
         function renderPartilhas(container) {
+            // Agrupando as partilhas por nome da pessoa
+            const groupedLoans = {};
+            
+            state.loans.forEach(l => {
+                const name = (l.debtorName || "Co-responsável").trim();
+                if (!groupedLoans[name]) {
+                    groupedLoans[name] = {
+                        debtorName: name,
+                        Santander: 0,
+                        Nio: 0,
+                        MercadoPago: 0,
+                        PicPay: 0,
+                        cardsLinked: new Set(),
+                        ids: [] // Guarda os IDs originais para controle se necessário
+                    };
+                }
+                
+                groupedLoans[name].Santander += parseFloat(l.Santander || 0);
+                groupedLoans[name].Nio += parseFloat(l.Nio || 0);
+                groupedLoans[name].MercadoPago += parseFloat(l.MercadoPago || 0);
+                groupedLoans[name].PicPay += parseFloat(l.PicPay || 0);
+                groupedLoans[name].ids.push(l.id);
+                if (l.name) groupedLoans[name].cardsLinked.add(l.name);
+            });
+
+            const uniqueDebtors = Object.values(groupedLoans);
+
             container.innerHTML = `
-                <h3 class="section-title">Coparticipações Ativas</h3>
+                <h3 class="section-title">Coparticipações Ativas (Por Pessoa)</h3>
                 <div class="list-container">
-                    ${state.loans.length === 0 ? `
+                    ${uniqueDebtors.length === 0 ? `
                         <div class="item-card" style="text-align: center; padding: 24px; color: var(--text-muted); border: 1px dashed var(--border-color);">
                             Nenhum registro de partilha. Clique no botão "+" e mude para a aba de "Partilha" para registrar quem lhe deve!
                         </div>
-                    ` : state.loans.map(l => {
-                        const total = getLoanTotal(l);
-                        const displayName = l.debtorName || "Co-responsável";
+                    ` : uniqueDebtors.map(l => {
+                        const total = l.Santander + l.Nio + l.MercadoPago + l.PicPay;
+                        const cardsList = Array.from(l.cardsLinked).join(', ') || 'Nenhum especificado';
                         return `
                             <div class="item-card">
                                 <div class="item-card-header">
                                     <div>
-                                        <h3 class="item-title">${displayName}</h3>
-                                        <span class="item-subtitle">Cartão Vinculado: ${l.name}</span>
+                                        <h3 class="item-title">${l.debtorName}</h3>
+                                        <span class="item-subtitle" style="color: #60a5fa; font-weight: 600;">Cartões Usados: ${cardsList}</span>
                                     </div>
-                                    <div class="item-value-side"><span class="item-value-label">Deve Total</span><span class="item-value-main" style="color: var(--warning-color);">${formatBRL(total)}</span></div>
+                                    <div class="item-value-side">
+                                        <span class="item-value-label">Deve Total</span>
+                                        <span class="item-value-main" style="color: var(--warning-color); font-size: 16px;">${formatBRL(total)}</span>
+                                    </div>
                                 </div>
                                 
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px;">
-                                    <div class="info-row"><span>Santander:</span><span>${formatBRL(parseFloat(l.Santander || 0))}</span></div>
-                                    <div class="info-row"><span>Nio:</span><span>${formatBRL(parseFloat(l.Nio || 0))}</span></div>
-                                    <div class="info-row"><span>Mercado Pago:</span><span>${formatBRL(parseFloat(l.MercadoPago || 0))}</span></div>
-                                    <div class="info-row"><span>PicPay:</span><span>${formatBRL(parseFloat(l.PicPay || 0))}</span></div>
+                                    <div class="info-row"><span>Santander:</span><span>${formatBRL(l.Santander)}</span></div>
+                                    <div class="info-row"><span>Nio:</span><span>${formatBRL(l.Nio)}</span></div>
+                                    <div class="info-row"><span>Mercado Pago:</span><span>${formatBRL(l.MercadoPago)}</span></div>
+                                    <div class="info-row"><span>PicPay:</span><span>${formatBRL(l.PicPay)}</span></div>
                                 </div>
 
                                 <div class="card-actions">
                                     <div class="action-buttons-row">
-                                        <button class="btn-action edit" onclick="editLoan('${l.id}')">Editar</button>
-                                        <button class="btn-action delete" style="grid-column: span 1;" onclick="deleteLoan('${l.id}')">Excluir</button>
+                                        <button class="btn-action edit" onclick="editGroupedLoan('${l.debtorName}')">Editar Tudo</button>
+                                        <button class="btn-action delete" style="grid-column: span 1;" onclick="deleteGroupedLoan('${l.debtorName}')">Quitar/Excluir</button>
                                     </div>
                                 </div>
                             </div>
@@ -1148,7 +1146,55 @@
             `;
         }
 
-        // --- RENDER SALÁRIO (CÁLCULO AUTOMÁTICO DE ACELERAÇÃO) ---
+        // --- FUNÇÕES DE CONTROLE EM MASSA DAS PARTILHAS AGRUPADAS ---
+        window.editGroupedLoan = function(debtorName) {
+            // Para editar mantendo o comportamento consistente, buscamos o primeiro registro da pessoa
+            const loanObj = state.loans.find(l => (l.debtorName || "Co-responsável").trim() === debtorName);
+            if (!loanObj) return;
+
+            state.modalMode = 'edit';
+            state.editingId = loanObj.id;
+            state.modalFormTab = 'loan';
+
+            document.getElementById('modal-title').textContent = `Editar Partilha de ${debtorName}`;
+            document.getElementById('modal-tabs-container').style.display = 'none';
+            document.getElementById('modal').classList.add('open');
+            
+            // Renderiza o form com os dados consolidados temporariamente para a edição desse registro base
+            const grouped = { ...loanObj, Santander: 0, Nio: 0, MercadoPago: 0, PicPay: 0 };
+            state.loans.forEach(l => {
+                if((l.debtorName || "Co-responsável").trim() === debtorName) {
+                    grouped.Santander += parseFloat(l.Santander || 0);
+                    grouped.Nio += parseFloat(l.Nio || 0);
+                    grouped.MercadoPago += parseFloat(l.MercadoPago || 0);
+                    grouped.PicPay += parseFloat(l.PicPay || 0);
+                }
+            });
+
+            // Limpa os outros do mesmo nome para evitar duplicações fantasmas pós-salvamento unificado
+            state.loans = state.loans.filter(l => (l.debtorName || "Co-responsável").trim() !== debtorName || l.id === loanObj.id);
+
+            renderFormFields(grouped);
+        }
+
+        window.deleteGroupedLoan = function(debtorName) {
+            if (confirm(`Deseja remover completamente e dar baixa em todas as dívidas de ${debtorName}?`)) {
+                let totalRemovido = 0;
+                state.loans.forEach(l => {
+                    if ((l.debtorName || "Co-responsável").trim() === debtorName) {
+                        totalRemovido += getLoanTotal(l);
+                    }
+                });
+                
+                state.loans = state.loans.filter(l => (l.debtorName || "Co-responsável").trim() !== debtorName);
+                logToJournal('remocao', `Quitação total das coparticipações de: ${debtorName}.`, -totalRemovido);
+                saveState();
+                renderActiveTab();
+                showToast(`Dívidas de ${debtorName} quitadas!`);
+            }
+        }
+
+        // --- RENDER SALÁRIO ---
         function renderSalario(container) {
             const daysLeft = getDaysUntilPayday();
             const calcs = calculateWeeklyMetas();
@@ -1162,7 +1208,7 @@
                         <span class="status-pill green">Faltam ${daysLeft} dias</span>
                     </div>
                     <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px;">
-                        Seu salário está previsto para o dia <strong>${state.salaryDay}</strong>. O sistema agora calcula a proximidade do pagamento automaticamente!
+                        Seu salário está previsto para o dia <strong>${state.salaryDay}</strong>. O sistema calcula a proximidade do pagamento automaticamente.
                     </p>
                     <div style="border-top: 1px dashed var(--border-color); padding-top: 10px; margin-top: 10px; display: flex; justify-content: space-between; font-size: 13px;">
                         <span style="color: var(--text-muted);">Abatimento Semanal Ativo:</span>
@@ -1182,13 +1228,6 @@
                             <input type="number" min="1" max="31" required id="f-salary-day" class="form-input" placeholder="Ex: 1" value="${state.salaryDay}">
                         </div>
 
-                        <div style="margin-top: 16px; padding: 12px; border-radius: 10px; background-color: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.15);">
-                            <h4 style="font-size: 12px; font-weight: 800; color: #60a5fa; margin-bottom: 6px;">Como funciona a aceleração de meta:</h4>
-                            <p style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">
-                                Se seu salário é R$ 1.000,00 e faltam 4 semanas, ele abate R$ 250,00 da meta desta semana. À medida que o dia ${state.salaryDay} se aproxima, as semanas restantes caem e o abatimento semanal aumenta automaticamente (R$ 333,00, R$ 500,00, até o valor total quando estiver na última semana), retroagindo agressivamente a sua meta antes mesmo dele cair!
-                            </p>
-                        </div>
-
                         <button type="submit" class="btn-submit" style="background-color: var(--accent-color); margin-top: 16px;">Salvar Configurações de Salário</button>
                     </form>
                 </div>
@@ -1204,7 +1243,7 @@
             state.salaryDay = salaryD;
 
             saveState();
-            logToJournal('salario', `Configuração de salário atualizada. Valor: ${formatBRL(salaryVal)}, Dia de recebimento: ${salaryD}.`, salaryVal);
+            logToJournal('salario', `Configuração de salário atualizada. Valor: ${formatBRL(salaryVal)}, Dia: ${salaryD}.`, salaryVal);
             showToast('Configurações de Salário salvas!');
             switchTab('dashboard');
         }
@@ -1219,7 +1258,7 @@
                 <div class="list-container">
                     ${state.history.length === 0 ? `
                         <div class="item-card" style="text-align: center; padding: 24px; color: var(--text-muted); border: 1px dashed var(--border-color);">
-                            Nenhum registro no diário ainda. Todas as suas despesas e pagamentos aparecerão aqui automaticamente!
+                            Nenhum registro no diário ainda.
                         </div>
                     ` : state.history.map(h => `
                         <div class="item-card" style="padding: 14px; gap: 8px;">
@@ -1316,7 +1355,6 @@
 
                 const journalHeader = [
                     ["LIVRO DIÁRIO - REGISTRO DE TRANSAÇÕES"],
-                    ["Arquivo auditado cronologicamente"],
                     [],
                     ["Data/Hora", "Tipo de Ação", "Descrição do Evento", "Valor Associado (R$)"]
                 ];
@@ -1333,16 +1371,9 @@
                 const wsJournal = XLSX.utils.aoa_to_sheet(journalHeader);
                 XLSX.utils.book_append_sheet(wb, wsJournal, "Livro Diário");
 
-                const d = new Date();
-                const day = String(d.getDate()).padStart(2, '0');
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                const year = d.getFullYear();
-                const formattedDate = `${day}_${month}_${year}`;
-
-                XLSX.writeFile(wb, `Gestor_Financas_Completo_${formattedDate}.xlsx`);
-                showToast("Arquivo Excel exportado com sucesso!");
+                XLSX.writeFile(wb, `Gestor_Financas_Completo.xlsx`);
+                showToast("Arquivo Excel exportado!");
             } catch (err) {
-                console.error("Erro na exportação Excel:", err);
                 showToast("Erro ao gerar o arquivo Excel.");
             }
         }
@@ -1391,11 +1422,11 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">Valor de Adiantamento Inicial (R$)</label>
-                        <input type="number" step="0.01" min="0" id="f-card-prepaid" class="form-input" placeholder="Valor já adiantado (opcional)" value="${editData ? editData.prepaid : '0'}">
+                        <input type="number" step="0.01" min="0" id="f-card-prepaid" class="form-input" placeholder="Valor já adiantado" value="${editData ? editData.prepaid : '0'}">
                     </div>
                 `;
             } else {
-                let selectOptions = `<option value="" disabled selected>Selecione um cartão</option>`;
+                let selectOptions = `<option value="" disabled selected>Selecione um cartão base principal</option>`;
                 if (state.cards.length === 0) {
                     selectOptions = `<option value="" disabled>Cadastre uma Fatura Primeiro!</option>`;
                 } else {
@@ -1408,16 +1439,16 @@
                 fieldsContainer.innerHTML = `
                     <div class="form-group">
                         <label class="form-label">Nome da Pessoa (Quem te deve)</label>
-                        <input type="text" required id="f-loan-debtor" class="form-input" placeholder="Ex: João da Silva, Maria" value="${editData ? (editData.debtorName || '') : ''}">
+                        <input type="text" required id="f-loan-debtor" class="form-input" placeholder="Ex: Romilda" value="${editData ? (editData.debtorName || '') : ''}">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Cartão Relacionado (Onde foi passada a despesa)</label>
+                        <label class="form-label">Cartão Principal Associado</label>
                         <select required id="f-loan-cardname" class="form-input" style="background-color: #0b0f19;">
                             ${selectOptions}
                         </select>
                     </div>
                     <div class="form-group" style="border-top: 1px dashed var(--border-color); padding-top: 12px; margin-top: 12px;">
-                        <span class="form-label" style="font-weight: 800; color: white;">VALORES INDIVIDUAIS DO CO-RESPONSÁVEL:</span>
+                        <span class="form-label" style="font-weight: 800; color: white;">VALORES INDIVIDUAIS POR BANCO:</span>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Fração Santander (R$)</label>
@@ -1456,10 +1487,7 @@
                     }
                 } else {
                     state.cards.push({ id: Date.now().toString(), name, totalBill, dueDay, prepaid });
-                    logToJournal('criacao', `Criação do cartão/despesa ${name} com vencimento no dia ${dueDay}.`, totalBill);
-                    if (prepaid > 0) {
-                        logToJournal('adiantamento', `Adiantamento registrado na criação do cartão ${name}.`, prepaid);
-                    }
+                    logToJournal('criacao', `Criação do cartão ${name}.`, totalBill);
                 }
                 switchTab('cartoes');
             } else {
@@ -1476,11 +1504,11 @@
                     const idx = state.loans.findIndex(i => i.id === state.editingId);
                     if (idx !== -1) {
                         state.loans[idx] = { ...state.loans[idx], name: cardName, debtorName, Santander, Nio, MercadoPago, PicPay };
-                        logToJournal('edicao', `Atualização da coparticipação de ${debtorName} (${cardName}). Total: ${formatBRL(sum)}.`, sum);
+                        logToJournal('edicao', `Atualização da partilha de ${debtorName}. Total: ${formatBRL(sum)}.`, sum);
                     }
                 } else {
                     state.loans.push({ id: Date.now().toString(), name: cardName, debtorName, Santander, Nio, MercadoPago, PicPay });
-                    logToJournal('criacao', `Nova coparticipação registrada para ${debtorName} (${cardName}). Valor: ${formatBRL(sum)}.`, sum);
+                    logToJournal('criacao', `Nova partilha para ${debtorName}. Valor: ${formatBRL(sum)}.`, sum);
                 }
                 switchTab('partilhas');
             }
@@ -1499,42 +1527,15 @@
             
             document.getElementById('modal-title').textContent = `Editar Cartão ${cardObj.name}`;
             document.getElementById('modal-tabs-container').style.display = 'none';
-            
             document.getElementById('modal').classList.add('open');
             renderFormFields(cardObj);
         }
 
         window.deleteCard = function(id) {
             const cardObj = state.cards.find(i => i.id === id);
-            if (cardObj && confirm(`Deseja excluir permanentemente o cartão ${cardObj.name}?`)) {
-                logToJournal('remocao', `Remoção do cartão/despesa: ${cardObj.name}. Fatura: ${formatBRL(cardObj.totalBill)}.`, -cardObj.totalBill);
+            if (cardObj && confirm(`Deseja excluir o cartão ${cardObj.name}?`)) {
+                logToJournal('remocao', `Remoção do cartão: ${cardObj.name}.`, -cardObj.totalBill);
                 state.cards = state.cards.filter(i => i.id !== id);
-                saveState();
-                renderActiveTab();
-            }
-        }
-
-        window.editLoan = function(id) {
-            const loanObj = state.loans.find(i => i.id === id);
-            if (!loanObj) return;
-
-            state.modalMode = 'edit';
-            state.editingId = id;
-            state.modalFormTab = 'loan';
-
-            document.getElementById('modal-title').textContent = `Editar Coparticipação`;
-            document.getElementById('modal-tabs-container').style.display = 'none';
-
-            document.getElementById('modal').classList.add('open');
-            renderFormFields(loanObj);
-        }
-
-        window.deleteLoan = function(id) {
-            const loanObj = state.loans.find(i => i.id === id);
-            if (loanObj && confirm(`Remover registro de devedor ${loanObj.debtorName || loanObj.name}?`)) {
-                const total = getLoanTotal(loanObj);
-                logToJournal('remocao', `Remoção do registro de devedor: ${loanObj.debtorName || loanObj.name}.`, -total);
-                state.loans = state.loans.filter(i => i.id !== id);
                 saveState();
                 renderActiveTab();
             }
@@ -1544,7 +1545,7 @@
             const c = state.cards.find(item => item.id === id);
             if (!c) return;
             document.getElementById('pay-card-id').value = id;
-            document.getElementById('pay-card-label').textContent = `Adiantar Cartão: ${name} (Fatura Atual: ${formatBRL(c.totalBill)})`;
+            document.getElementById('pay-card-label').textContent = `Adiantar Cartão: ${name} (Fatura: ${formatBRL(c.totalBill)})`;
             document.getElementById('pay-amount').value = '';
             document.getElementById('pay-modal').classList.add('open');
         }
@@ -1566,12 +1567,10 @@
             if (idx !== -1) {
                 const currentPrepaid = parseFloat(state.cards[idx].prepaid || 0);
                 state.cards[idx].prepaid = currentPrepaid + amount;
-
-                logToJournal('adiantamento', `Adiantamento via Débito/Pix efetuado no cartão ${state.cards[idx].name}.`, amount);
-
+                logToJournal('adiantamento', `Adiantamento efetuado no cartão ${state.cards[idx].name}.`, amount);
                 saveState();
                 closePayModal();
-                showToast(`Pago ${formatBRL(amount)} no débito!`);
+                showToast(`Pago ${formatBRL(amount)}!`);
                 renderActiveTab();
             }
         }
@@ -1579,7 +1578,6 @@
         window.onload = function() {
             const realToday = getRealTodayString();
             simulatedTodayStr = realToday;
-            localStorage.setItem('simulated_today', realToday);
             updateSimulatedToday(realToday);
         };
     </script>

@@ -736,22 +736,21 @@
 
     <!-- SCRIPT FINANÇAS LOCAIS -->
     <script>
-        // 🛡️ DADOS INICIAIS VAZIOS (Para privacidade por padrão no seu armazenamento local)
         const initialCards = [];
         const initialLoans = [];
         const initialHistory = [
             { id: 'sys-init', date: new Date().toLocaleString('pt-BR'), type: 'criacao', description: 'Sistema de Livro Diário inicializado com sucesso.', amount: 0 }
         ];
 
-        // Estado carregado diretamente do armazenamento local (localStorage)
+        // Estado carregado do localStorage
         let state = {
             cards: JSON.parse(localStorage.getItem('cards')) || initialCards,
             loans: JSON.parse(localStorage.getItem('loans')) || initialLoans,
             history: JSON.parse(localStorage.getItem('history')) || initialHistory,
             safetyMargin: parseFloat(localStorage.getItem('safetyMargin')) || 0.15,
             activeTab: 'dashboard',
-            modalMode: 'create', // 'create' ou 'edit'
-            modalFormTab: 'card', // 'card' ou 'loan'
+            modalMode: 'create',
+            modalFormTab: 'card',
             editingId: null
         };
 
@@ -763,7 +762,6 @@
             localStorage.setItem('safetyMargin', state.safetyMargin.toString());
         }
 
-        // Exibir feedbacks rápidos na interface
         function showToast(msg) {
             const toast = document.getElementById('toast');
             document.getElementById('toast-msg').textContent = msg;
@@ -773,12 +771,10 @@
             }, 2500);
         }
 
-        // Formatação de valores Monetários BRL (Moeda brasileira)
         function formatBRL(v) {
             return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
         }
 
-        // Função para acrescentar entradas no Livro Diário de forma cronológica
         function logToJournal(type, description, amount) {
             const timestamp = new Date().toLocaleString('pt-BR');
             state.history.unshift({
@@ -788,13 +784,11 @@
                 description: description,
                 amount: amount
             });
-            // Mantém no máximo 500 registros para otimização de performance
             if (state.history.length > 500) {
                 state.history = state.history.slice(0, 500);
             }
         }
 
-        // Sistema Simulado de Data Base (Data do Dia)
         let simulatedTodayStr = new Date().toISOString().split('T')[0];
         
         function getRealTodayString() {
@@ -814,16 +808,16 @@
             renderActiveTab();
         }
 
-        // --- GESTÃO DOS VALORES DE COPARTICIPAÇÃO ---
-        // Retorna o somatório de todos os co-responsáveis de uma partilha
+        // Retorna o somatório de coparticipações/empréstimos a terceiros
         function getLoanTotal(l) {
+            if (!l) return 0;
             return parseFloat(l.Santander || 0) + 
                    parseFloat(l.Nio || 0) + 
                    parseFloat(l.MercadoPago || 0) + 
                    parseFloat(l.PicPay || 0);
         }
 
-        // --- SISTEMA DE CÁLCULO E MOTOR FINANCEIRO DA META ---
+        // --- MOTOR FINANCEIRO ATUALIZADO E TOTALMENTE CORRIGIDO ---
         function calculateWeeklyMetas() {
             const [todayYear, todayMonth, todayDay] = simulatedTodayStr.split('-').map(Number);
             const today = new Date(todayYear, todayMonth - 1, todayDay);
@@ -839,7 +833,6 @@
                 const dueDay = parseInt(card.dueDay);
                 let computedDueDate = new Date(currentYear, currentMonth, dueDay);
 
-                // Tratamento se o vencimento for para o mês subsequente
                 if (computedDueDate < today) {
                     computedDueDate = new Date(currentYear, currentMonth + 1, dueDay);
                 }
@@ -847,7 +840,7 @@
                 const diffTime = computedDueDate.getTime() - today.getTime();
                 const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                // Processar partilhas de devedores associadas ao nome deste cartão de forma insensível a maiúsculas
+                // Busca robusta de partilhas ligadas a este cartão (ignorando maiúsculas e espaços)
                 const loansForCard = state.loans.filter(l => l.name.trim().toLowerCase() === card.name.trim().toLowerCase());
                 let loansTotal = 0;
                 loansForCard.forEach(l => {
@@ -857,10 +850,10 @@
                 const totalBill = parseFloat(card.totalBill || 0);
                 const prepaidAmount = parseFloat(card.prepaid || 0);
                 
-                // Cálculo da minha parte líquida: Total Fatura - Parcelas Devedores - Adiantamentos pagos
+                // CÁLCULO EXATO DA PARTE DO USUÁRIO: Fatura total - Empréstimos a terceiros - Adiantamentos pagos
                 const myShare = Math.max(0, totalBill - loansTotal - prepaidAmount);
 
-                // Cálculo de esforço semanal (Até o vencimento da fatura)
+                // Meta Semanal baseada estritamente na minha parte líquida restante
                 const weeksRemaining = Math.max(1, daysRemaining / 7);
                 const weeklyEffort = myShare / weeksRemaining;
 
@@ -881,7 +874,7 @@
                 };
             });
 
-            // Somatório de todas as Metas Semanais líquidas
+            // Somatório das metas individuais líquidas atualizadas em tempo real
             const baseWeeklyMeta = processedCards.reduce((sum, item) => sum + item.weeklyEffort, 0);
             const totalWeeklyMeta = baseWeeklyMeta * (1 + state.safetyMargin);
 
@@ -899,12 +892,9 @@
         // --- SISTEMA DE ABAS ---
         window.switchTab = function(tabName) {
             state.activeTab = tabName;
-            
-            // Atualiza classe ativa dos botões do menu inferior
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
             const activeNavBtn = document.getElementById(`nav-${tabName}`);
             if (activeNavBtn) activeNavBtn.classList.add('active');
-
             renderActiveTab();
         }
 
@@ -923,14 +913,13 @@
             }
         }
 
-        // Ajustar dinamicamente a margem de segurança
         window.adjustMargin = function(amount) {
             state.safetyMargin = Math.max(0, state.safetyMargin + amount);
             saveState();
             renderActiveTab();
         };
 
-        // --- RENDER DEDICADO DAS ABAS ---
+        // --- INTERFACES DE VISUALIZAÇÃO ---
         function renderDashboard(container, data) {
             const marginPercent = Math.round(state.safetyMargin * 100);
 
@@ -959,7 +948,7 @@
                         <span class="summary-value">${formatBRL(data.baseWeeklyMeta)}</span>
                     </div>
                     <div class="summary-card">
-                        <span class="summary-label">Minha Parte Total</span>
+                        <span class="summary-label">Minha Parte Líquida Total</span>
                         <span class="summary-value" style="color: #60a5fa;">${formatBRL(data.totalMyShare)}</span>
                     </div>
                 </div>
@@ -1010,7 +999,11 @@
 
                             <div class="info-row">
                                 <span>Fatura Base: ${formatBRL(c.totalBill)}</span>
-                                <span>Minha Parte: ${formatBRL(c.myShare)}</span>
+                                <span>Coparticipação (Empréstimos): ${formatBRL(c.loansTotal)}</span>
+                            </div>
+                            <div class="info-row">
+                                <span>Adiantamento efetuado: ${formatBRL(c.prepaidAmount)}</span>
+                                <span style="font-weight: 800; color: #60a5fa;">Minha Parte Líquida: ${formatBRL(c.myShare)}</span>
                             </div>
                         </div>
                     `;
@@ -1035,11 +1028,11 @@
                                     <h3 class="item-title">${c.name}</h3>
                                     <span class="item-subtitle">Próximo Vencimento: ${c.computedDueDate.toLocaleDateString('pt-BR')} (Dia ${c.dueDay})</span>
                                 </div>
-                                <div class="item-value-side"><span class="item-value-label">Total</span><span class="item-value-main">${formatBRL(c.totalBill)}</span></div>
+                                <div class="item-value-side"><span class="item-value-label">Total Fatura</span><span class="item-value-main">${formatBRL(c.totalBill)}</span></div>
                             </div>
                             
                             <div class="info-row">
-                                <span>Coparticipações Ativas (Co-responsáveis)</span>
+                                <span>Coparticipações (Empréstimo a terceiros)</span>
                                 <span style="color: var(--warning-color);">- ${formatBRL(c.loansTotal)}</span>
                             </div>
                             <div class="info-row">
@@ -1047,7 +1040,7 @@
                                 <span style="color: var(--success-color);">- ${formatBRL(c.prepaidAmount)}</span>
                             </div>
                             <div class="info-row" style="border-top: 1px solid var(--border-color); font-weight: bold;">
-                                <span style="color: white;">Parte Líquida a Pagar (Minha Parte)</span>
+                                <span style="color: white;">Parte Líquida a Pagar (Sua Parte)</span>
                                 <span style="color: #60a5fa; font-size: 14px;">${formatBRL(c.myShare)}</span>
                             </div>
 
@@ -1134,7 +1127,6 @@
             `;
         }
 
-        // Limpar o diário com confirmação
         window.clearJournal = function() {
             if (confirm("Tem certeza de que deseja limpar permanentemente todo o histórico do Livro Diário?")) {
                 state.history = [
@@ -1146,13 +1138,12 @@
             }
         }
 
-        // --- EXPORTAÇÃO EXCEL NATIVA EM 3 ABAS COM FORMATO xlsx ---
+        // --- EXPORTAÇÃO EXCEL NATIVA ---
         window.exportToExcel = function() {
             try {
                 const calcs = calculateWeeklyMetas();
                 const wb = XLSX.utils.book_new();
 
-                // 1. Criar dados para a primeira aba: "Resumo & Cartões"
                 const summaryHeader = [
                     ["GESTOR FINANCEIRO - METAS SEMANAIS"],
                     ["Data da Exportação", new Date().toLocaleDateString('pt-BR')],
@@ -1187,7 +1178,6 @@
                 const wsSummary = XLSX.utils.aoa_to_sheet(summaryHeader);
                 XLSX.utils.book_append_sheet(wb, wsSummary, "Resumo e Cartões");
 
-                // 2. Criar dados para a segunda aba: "Partilhas & Devedores"
                 const loansHeader = [
                     ["DETALHAMENTO DE COPARTICIPAÇÕES POR CARTÃO VINCULADO"],
                     [],
@@ -1209,7 +1199,6 @@
                 const wsLoans = XLSX.utils.aoa_to_sheet(loansHeader);
                 XLSX.utils.book_append_sheet(wb, wsLoans, "Partilhas e Devedores");
 
-                // 3. Criar dados para a terceira aba: "Livro Diário"
                 const journalHeader = [
                     ["LIVRO DIÁRIO - REGISTRO DE TRANSAÇÕES"],
                     ["Arquivo auditado cronologicamente"],
@@ -1229,14 +1218,12 @@
                 const wsJournal = XLSX.utils.aoa_to_sheet(journalHeader);
                 XLSX.utils.book_append_sheet(wb, wsJournal, "Livro Diário");
 
-                // Configuração da data no formato dd_mm_aaaa para o nome do arquivo
                 const d = new Date();
                 const day = String(d.getDate()).padStart(2, '0');
                 const month = String(d.getMonth() + 1).padStart(2, '0');
                 const year = d.getFullYear();
                 const formattedDate = `${day}_${month}_${year}`;
 
-                // Gerar e descarregar o arquivo .xlsx completo com a nova formatação de data
                 XLSX.writeFile(wb, `Gestor_Financas_Completo_${formattedDate}.xlsx`);
                 showToast("Arquivo Excel (3 abas) exportado com sucesso!");
             } catch (err) {
@@ -1245,16 +1232,13 @@
             }
         }
 
-        // --- GESTÃO DOS FORMULÁRIOS DINÂMICOS NOS MODAIS ---
+        // --- MODAIS E FORMULÁRIOS ---
         window.openAddModal = function() {
             state.modalMode = 'create';
             state.editingId = null;
             document.getElementById('modal-title').textContent = "Adicionar Novo Registro";
-            document.getElementById('modal-tabs-container').style.display = 'grid'; // Mostrar abas para novos registros
-            
-            // Força aba inicial do form para 'card'
+            document.getElementById('modal-tabs-container').style.display = 'grid';
             switchModalFormTab('card');
-            
             document.getElementById('modal').classList.add('open');
         }
 
@@ -1268,10 +1252,8 @@
 
         window.switchModalFormTab = function(formTab) {
             state.modalFormTab = formTab;
-            
             document.querySelectorAll('#modal-tabs-container button').forEach(b => b.classList.remove('active'));
             document.getElementById(`modal-tab-${formTab}`).classList.add('active');
-
             renderFormFields();
         }
 
@@ -1301,7 +1283,7 @@
                 fieldsContainer.innerHTML = `
                     <div class="form-group">
                         <label class="form-label">Nome exato do Cartão Relacionado</label>
-                        <input type="text" required id="f-loan-name" class="form-input" placeholder="Nome idêntico ao cartão: Ex: Santander" value="${editData ? editData.name : ''}">
+                        <input type="text" required id="f-loan-name" class="form-input" placeholder="Ex: Santander" value="${editData ? editData.name : ''}">
                     </div>
                     <div class="form-group" style="border-top: 1px dashed var(--border-color); padding-top: 12px; margin-top: 12px;">
                         <span class="form-label" style="font-weight: 800; color: white;">VALORES INDIVIDUAIS DOS CO-RESPONSÁVEIS:</span>
@@ -1383,7 +1365,7 @@
             state.modalFormTab = 'card';
             
             document.getElementById('modal-title').textContent = `Editar Cartão ${cardObj.name}`;
-            document.getElementById('modal-tabs-container').style.display = 'none'; // Esconder abas durante a edição
+            document.getElementById('modal-tabs-container').style.display = 'none';
             
             document.getElementById('modal').classList.add('open');
             renderFormFields(cardObj);
@@ -1425,7 +1407,6 @@
             }
         }
 
-        // --- SISTEMA DE MODAL DE ADIANTAMENTO RÁPIDO (DÉBITO/PIX) ---
         window.openPayModal = function(id, name) {
             const c = state.cards.find(item => item.id === id);
             if (!c) return;
@@ -1453,7 +1434,6 @@
                 const currentPrepaid = parseFloat(state.cards[idx].prepaid || 0);
                 state.cards[idx].prepaid = currentPrepaid + amount;
 
-                // Grava a transação no diário
                 logToJournal('adiantamento', `Adiantamento via Débito/Pix efetuado no cartão ${state.cards[idx].name}.`, amount);
 
                 saveState();

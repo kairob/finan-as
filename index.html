@@ -627,7 +627,7 @@
             transform: translateX(-50%) translateY(0);
         }
 
-        /* --- DIARIO DE EVENTOS --- */
+        /* --- DIÁRIO DE EVENTOS --- */
         .log-tag {
             font-size: 10px;
             font-weight: 700;
@@ -736,7 +736,7 @@
 
     <!-- SCRIPT FINANÇAS LOCAIS -->
     <script>
-        // 🛡️ DADOS INICIAIS VAZIOS (Para privacidade por omissão no seu GitHub público)
+        // 🛡️ DADOS INICIAIS VAZIOS (Para privacidade por padrão no seu armazenamento local)
         const initialCards = [];
         const initialLoans = [];
         const initialHistory = [
@@ -763,7 +763,7 @@
             localStorage.setItem('safetyMargin', state.safetyMargin.toString());
         }
 
-        // Exibir feedbacks rápidos
+        // Exibir feedbacks rápidos na interface
         function showToast(msg) {
             const toast = document.getElementById('toast');
             document.getElementById('toast-msg').textContent = msg;
@@ -773,7 +773,7 @@
             }, 2500);
         }
 
-        // Formatação de valores Monetários BRL
+        // Formatação de valores Monetários BRL (Moeda brasileira)
         function formatBRL(v) {
             return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
         }
@@ -814,6 +814,15 @@
             renderActiveTab();
         }
 
+        // --- GESTÃO DOS VALORES DE COPARTICIPAÇÃO ---
+        // Retorna o somatório de todos os co-responsáveis de uma partilha
+        function getLoanTotal(l) {
+            return parseFloat(l.Santander || 0) + 
+                   parseFloat(l.Nio || 0) + 
+                   parseFloat(l.MercadoPago || 0) + 
+                   parseFloat(l.PicPay || 0);
+        }
+
         // --- SISTEMA DE CÁLCULO E MOTOR FINANCEIRO DA META ---
         function calculateWeeklyMetas() {
             const [todayYear, todayMonth, todayDay] = simulatedTodayStr.split('-').map(Number);
@@ -838,17 +847,17 @@
                 const diffTime = computedDueDate.getTime() - today.getTime();
                 const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                // Processar partilhas de devedores associadas ao nome deste cartão
+                // Processar partilhas de devedores associadas ao nome deste cartão de forma insensível a maiúsculas
                 const loansForCard = state.loans.filter(l => l.name.trim().toLowerCase() === card.name.trim().toLowerCase());
                 let loansTotal = 0;
                 loansForCard.forEach(l => {
-                    loansTotal += (parseFloat(l.MP || 0) + parseFloat(l.PP || 0) + parseFloat(l.SAN || 0) + parseFloat(l.NIO || 0));
+                    loansTotal += getLoanTotal(l);
                 });
 
                 const totalBill = parseFloat(card.totalBill || 0);
                 const prepaidAmount = parseFloat(card.prepaid || 0);
                 
-                // Cálculo de minha parte líquida: Total Fatura - Parcelas Devedores - Adiantamentos pagos
+                // Cálculo da minha parte líquida: Total Fatura - Parcelas Devedores - Adiantamentos pagos
                 const myShare = Math.max(0, totalBill - loansTotal - prepaidAmount);
 
                 // Cálculo de esforço semanal (Até o vencimento da fatura)
@@ -930,7 +939,7 @@
                 <div class="meta-card">
                     <span class="meta-card-label">Meta Semanal (Com Margem)</span>
                     <h2 class="meta-card-value">${formatBRL(data.totalWeeklyMeta)}</h2>
-                    <p class="meta-card-desc">Cálculo contínuo com acréscimo de +${marginPercent}% de margem.</p>
+                    <p class="meta-card-desc">Cálculo contínuo com acréscimo de +${marginPercent}% de margem de segurança.</p>
                 </div>
                 
                 <!-- CONTROLE INTERATIVO DA MARGEM DE SEGURANÇA -->
@@ -961,7 +970,7 @@
                         <span class="summary-value" style="font-size: 13px;">${formatBRL(data.totalBaseBill)}</span>
                     </div>
                     <div class="summary-card" style="padding: 10px;">
-                        <span class="summary-label" style="font-size: 9px;">Devedores (Partilha)</span>
+                        <span class="summary-label" style="font-size: 9px;">Coparticipações</span>
                         <span class="summary-value" style="font-size: 13px; color: var(--warning-color);">${formatBRL(data.totalLoansSum)}</span>
                     </div>
                     <div class="summary-card" style="padding: 10px;">
@@ -992,7 +1001,7 @@
                             </div>
                             
                             <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: -4px;">
-                                <span>Progresso da Quitação (Adiantamentos + Partilhas)</span>
+                                <span>Progresso da Quitação (Adiantamentos + Coparticipação)</span>
                                 <span>${Math.round(progress)}%</span>
                             </div>
                             <div class="progress-bar-container">
@@ -1012,7 +1021,7 @@
         function renderCartoes(container, data) {
             container.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                    <h3 class="section-title" style="margin: 0;">Faturas Cadastradas</h3>
+                    <h3 class="section-title" style="margin: 0;">Faturas Registradas</h3>
                 </div>
                 <div class="list-container">
                     ${state.cards.length === 0 ? `
@@ -1030,7 +1039,7 @@
                             </div>
                             
                             <div class="info-row">
-                                <span>Devedores (Partilha)</span>
+                                <span>Coparticipações Ativas (Co-responsáveis)</span>
                                 <span style="color: var(--warning-color);">- ${formatBRL(c.loansTotal)}</span>
                             </div>
                             <div class="info-row">
@@ -1038,7 +1047,7 @@
                                 <span style="color: var(--success-color);">- ${formatBRL(c.prepaidAmount)}</span>
                             </div>
                             <div class="info-row" style="border-top: 1px solid var(--border-color); font-weight: bold;">
-                                <span style="color: white;">Parte Líquida a Pagar (Eu)</span>
+                                <span style="color: white;">Parte Líquida a Pagar (Minha Parte)</span>
                                 <span style="color: #60a5fa; font-size: 14px;">${formatBRL(c.myShare)}</span>
                             </div>
 
@@ -1060,14 +1069,14 @@
 
         function renderPartilhas(container) {
             container.innerHTML = `
-                <h3 class="section-title">Devedores & Co-Responsáveis</h3>
+                <h3 class="section-title">Coparticipações Ativas</h3>
                 <div class="list-container">
                     ${state.loans.length === 0 ? `
                         <div class="item-card" style="text-align: center; padding: 24px; color: var(--text-muted); border: 1px dashed var(--border-color);">
-                            Nenhuma partilha registrada. Clique no botão "+" e mude para a aba de "Partilha" para registrar quem te deve!
+                            Nenhum registro de partilha. Clique no botão "+" e mude para a aba de "Partilha" para registrar quem lhe deve!
                         </div>
                     ` : state.loans.map(l => {
-                        const total = parseFloat(l.MP || 0) + parseFloat(l.PP || 0) + parseFloat(l.SAN || 0) + parseFloat(l.NIO || 0);
+                        const total = getLoanTotal(l);
                         return `
                             <div class="item-card">
                                 <div class="item-card-header">
@@ -1075,14 +1084,14 @@
                                         <h3 class="item-title">${l.name}</h3>
                                         <span class="item-subtitle">Grupo de Cartão Vinculado</span>
                                     </div>
-                                    <div class="item-value-side"><span class="item-value-label">Dívida Total</span><span class="item-value-main" style="color: var(--warning-color);">${formatBRL(total)}</span></div>
+                                    <div class="item-value-side"><span class="item-value-label">Coparticipação</span><span class="item-value-main" style="color: var(--warning-color);">${formatBRL(total)}</span></div>
                                 </div>
                                 
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px;">
-                                    <div class="info-row"><span>MP:</span><span>${formatBRL(parseFloat(l.MP || 0))}</span></div>
-                                    <div class="info-row"><span>PP:</span><span>${formatBRL(parseFloat(l.PP || 0))}</span></div>
-                                    <div class="info-row"><span>SAN:</span><span>${formatBRL(parseFloat(l.SAN || 0))}</span></div>
-                                    <div class="info-row"><span>NIO:</span><span>${formatBRL(parseFloat(l.NIO || 0))}</span></div>
+                                    <div class="info-row"><span>Santander:</span><span>${formatBRL(parseFloat(l.Santander || 0))}</span></div>
+                                    <div class="info-row"><span>Nio:</span><span>${formatBRL(parseFloat(l.Nio || 0))}</span></div>
+                                    <div class="info-row"><span>Mercado Pago:</span><span>${formatBRL(parseFloat(l.MercadoPago || 0))}</span></div>
+                                    <div class="info-row"><span>PicPay:</span><span>${formatBRL(parseFloat(l.PicPay || 0))}</span></div>
                                 </div>
 
                                 <div class="card-actions">
@@ -1180,19 +1189,19 @@
 
                 // 2. Criar dados para a segunda aba: "Partilhas & Devedores"
                 const loansHeader = [
-                    ["DETALHAMENTO DE DEVEDORES POR CARTÃO VINCULADO"],
+                    ["DETALHAMENTO DE COPARTICIPAÇÕES POR CARTÃO VINCULADO"],
                     [],
-                    ["Nome do Grupo/Cartão", "Devedor MP (R$)", "Devedor PP (R$)", "Devedor SAN (R$)", "Devedor NIO (R$)", "Total Devedores do Grupo (R$)"]
+                    ["Nome do Grupo/Cartão", "Santander (R$)", "Nio (R$)", "Mercado Pago (R$)", "PicPay (R$)", "Total Devedores do Grupo (R$)"]
                 ];
 
                 state.loans.forEach(l => {
-                    const total = parseFloat(l.MP || 0) + parseFloat(l.PP || 0) + parseFloat(l.SAN || 0) + parseFloat(l.NIO || 0);
+                    const total = getLoanTotal(l);
                     loansHeader.push([
                         l.name,
-                        parseFloat(l.MP || 0),
-                        parseFloat(l.PP || 0),
-                        parseFloat(l.SAN || 0),
-                        parseFloat(l.NIO || 0),
+                        parseFloat(l.Santander || 0),
+                        parseFloat(l.Nio || 0),
+                        parseFloat(l.MercadoPago || 0),
+                        parseFloat(l.PicPay || 0),
                         total
                     ]);
                 });
@@ -1273,7 +1282,7 @@
                 fieldsContainer.innerHTML = `
                     <div class="form-group">
                         <label class="form-label">Nome identificador do Cartão/Fatura</label>
-                        <input type="text" required id="f-card-name" class="form-input" placeholder="Ex: Visa Inter, Nubank, Luz, Net" value="${editData ? editData.name : ''}">
+                        <input type="text" required id="f-card-name" class="form-input" placeholder="Ex: Santander, Visa Inter, Luz" value="${editData ? editData.name : ''}">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Valor Bruto da Fatura Atual (R$)</label>
@@ -1292,26 +1301,26 @@
                 fieldsContainer.innerHTML = `
                     <div class="form-group">
                         <label class="form-label">Nome exato do Cartão Relacionado</label>
-                        <input type="text" required id="f-loan-name" class="form-input" placeholder="Nome idêntico ao cartão: Ex: Visa Inter" value="${editData ? editData.name : ''}">
+                        <input type="text" required id="f-loan-name" class="form-input" placeholder="Nome idêntico ao cartão: Ex: Santander" value="${editData ? editData.name : ''}">
                     </div>
                     <div class="form-group" style="border-top: 1px dashed var(--border-color); padding-top: 12px; margin-top: 12px;">
                         <span class="form-label" style="font-weight: 800; color: white;">VALORES INDIVIDUAIS DOS CO-RESPONSÁVEIS:</span>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Fração MP (R$)</label>
-                        <input type="number" step="0.01" min="0" id="f-loan-mp" class="form-input" value="${editData ? editData.MP : '0'}">
+                        <label class="form-label">Fração Santander (R$)</label>
+                        <input type="number" step="0.01" min="0" id="f-loan-santander" class="form-input" value="${editData ? editData.Santander : '0'}">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Fração PP (R$)</label>
-                        <input type="number" step="0.01" min="0" id="f-loan-pp" class="form-input" value="${editData ? editData.PP : '0'}">
+                        <label class="form-label">Fração Nio (R$)</label>
+                        <input type="number" step="0.01" min="0" id="f-loan-nio" class="form-input" value="${editData ? editData.Nio : '0'}">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Fração SAN (R$)</label>
-                        <input type="number" step="0.01" min="0" id="f-loan-san" class="form-input" value="${editData ? editData.SAN : '0'}">
+                        <label class="form-label">Fração Mercado Pago (R$)</label>
+                        <input type="number" step="0.01" min="0" id="f-loan-mp" class="form-input" value="${editData ? editData.MercadoPago : '0'}">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Fração NIO (R$)</label>
-                        <input type="number" step="0.01" min="0" id="f-loan-nio" class="form-input" value="${editData ? editData.NIO : '0'}">
+                        <label class="form-label">Fração PicPay (R$)</label>
+                        <input type="number" step="0.01" min="0" id="f-loan-pp" class="form-input" value="${editData ? editData.PicPay : '0'}">
                     </div>
                 `;
             }
@@ -1342,21 +1351,21 @@
                 switchTab('cartoes');
             } else {
                 const name = document.getElementById('f-loan-name').value.trim();
-                const MP = parseFloat(document.getElementById('f-loan-mp').value) || 0;
-                const PP = parseFloat(document.getElementById('f-loan-pp').value) || 0;
-                const SAN = parseFloat(document.getElementById('f-loan-san').value) || 0;
-                const NIO = parseFloat(document.getElementById('f-loan-nio').value) || 0;
-                const sum = MP + PP + SAN + NIO;
+                const Santander = parseFloat(document.getElementById('f-loan-santander').value) || 0;
+                const Nio = parseFloat(document.getElementById('f-loan-nio').value) || 0;
+                const MercadoPago = parseFloat(document.getElementById('f-loan-mp').value) || 0;
+                const PicPay = parseFloat(document.getElementById('f-loan-pp').value) || 0;
+                const sum = Santander + Nio + MercadoPago + PicPay;
 
                 if (state.modalMode === 'edit') {
                     const idx = state.loans.findIndex(i => i.id === state.editingId);
                     if (idx !== -1) {
-                        state.loans[idx] = { ...state.loans[idx], name, MP, PP, SAN, NIO };
-                        logToJournal('edicao', `Atualização da partilha de ${name}. Total devedor: ${formatBRL(sum)}.`, sum);
+                        state.loans[idx] = { ...state.loans[idx], name, Santander, Nio, MercadoPago, PicPay };
+                        logToJournal('edicao', `Atualização da coparticipação de ${name}. Total devedor: ${formatBRL(sum)}.`, sum);
                     }
                 } else {
-                    state.loans.push({ id: Date.now().toString(), name, MP, PP, SAN, NIO });
-                    logToJournal('criacao', `Nova partilha registrada para ${name}. Valor em dívida: ${formatBRL(sum)}.`, sum);
+                    state.loans.push({ id: Date.now().toString(), name, Santander, Nio, MercadoPago, PicPay });
+                    logToJournal('criacao', `Nova coparticipação registrada para ${name}. Valor em dívida: ${formatBRL(sum)}.`, sum);
                 }
                 switchTab('partilhas');
             }
@@ -1398,7 +1407,7 @@
             state.editingId = id;
             state.modalFormTab = 'loan';
 
-            document.getElementById('modal-title').textContent = `Editar Partilha ${loanObj.name}`;
+            document.getElementById('modal-title').textContent = `Editar Coparticipação ${loanObj.name}`;
             document.getElementById('modal-tabs-container').style.display = 'none';
 
             document.getElementById('modal').classList.add('open');
@@ -1407,8 +1416,8 @@
 
         window.deleteLoan = function(id) {
             const loanObj = state.loans.find(i => i.id === id);
-            if (loanObj && confirm(`Remover devedor ${loanObj.name}?`)) {
-                const total = parseFloat(loanObj.MP || 0) + parseFloat(loanObj.PP || 0) + parseFloat(loanObj.SAN || 0) + parseFloat(loanObj.NIO || 0);
+            if (loanObj && confirm(`Remover registro de devedor ${loanObj.name}?`)) {
+                const total = getLoanTotal(loanObj);
                 logToJournal('remocao', `Remoção do registro de devedor: ${loanObj.name}.`, -total);
                 state.loans = state.loans.filter(i => i.id !== id);
                 saveState();

@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Meta Semanal - Finanças Privadas</title>
+    <title>Meta Semanal - Super Central Financeira</title>
+    <!-- Biblioteca SheetJS para geração de arquivos Excel nativos diretamente no navegador -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.mini.min.js"></script>
     <style>
         /* --- ESTILOS NATIVOS CSS DE ALTO DESEMPENHO (Premium Dark Theme) --- */
@@ -20,6 +21,7 @@
             --secondary: #14b8a6;
             --accent-rose: #f43f5e;
             --accent-amber: #f59e0b;
+            --accent-purple: #8b5cf6;
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.5);
         }
 
@@ -51,7 +53,7 @@
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border-color);
-            padding: 16px 20px;
+            padding: 12px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -66,28 +68,28 @@
         }
 
         .header-logo {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             display: flex;
             align-items: center;
             justify-content: center;
             color: #020617;
             font-weight: 800;
-            font-size: 20px;
+            font-size: 18px;
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
         }
 
         .header-title {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 700;
             color: #ffffff;
             line-height: 1.2;
         }
 
         .header-subtitle {
-            font-size: 10px;
+            font-size: 9px;
             color: var(--text-muted);
             margin-top: 2px;
         }
@@ -166,24 +168,30 @@
             flex: 1;
             overflow-y: auto;
             padding: 16px;
-            padding-bottom: 112px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+            padding-bottom: 120px; /* Margem extra no fundo para não bater na navegação */
         }
 
         main::-webkit-scrollbar {
             display: none;
         }
 
+        /* --- CONTAINER DO FLUXO VERTICAL SEGURO --- */
+        .dashboard-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+        }
+
         /* --- CARDS E MÉTRICAS --- */
         .meta-card {
             background: linear-gradient(135deg, var(--bg-card), #061510);
             border: 1px solid var(--border-color);
-            padding: 24px;
-            border-radius: 24px;
+            padding: 20px;
+            border-radius: 20px;
             text-align: center;
             box-shadow: var(--shadow-lg);
+            width: 100%;
         }
 
         .meta-card-label {
@@ -196,70 +204,77 @@
         }
 
         .meta-card-value {
-            font-size: 36px;
+            font-size: 32px;
             font-weight: 800;
             color: var(--primary);
-            margin-top: 8px;
+            margin-top: 6px;
         }
 
         .meta-card-desc {
-            font-size: 11px;
+            font-size: 10px;
             color: var(--text-muted);
-            margin-top: 8px;
+            margin-top: 6px;
         }
 
         .summary-grid {
             display: grid;
             grid-template-cols: 1fr 1fr;
             gap: 12px;
+            width: 100%;
         }
 
         .summary-card {
             background-color: rgba(15, 23, 42, 0.6);
             border: 1px solid var(--border-color);
-            padding: 16px;
-            border-radius: 16px;
+            padding: 12px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .summary-label {
-            font-size: 9px;
+            font-size: 8px;
             color: var(--text-muted);
             font-weight: 700;
             text-transform: uppercase;
         }
 
         .summary-value {
-            font-size: 18px;
+            font-size: 15px;
             font-weight: 700;
             color: #f1f5f9;
-            margin-top: 4px;
+            margin-top: 2px;
             display: block;
         }
 
         .section-title {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
             color: var(--text-muted);
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .list-container {
             display: flex;
             flex-direction: column;
             gap: 12px;
+            width: 100%;
         }
 
         .item-card {
             background-color: var(--bg-card);
             border: 1px solid rgba(51, 65, 85, 0.8);
-            border-radius: 16px;
-            padding: 16px;
+            border-radius: 14px;
+            padding: 14px;
             display: flex;
             flex-direction: column;
             gap: 12px;
             overflow: hidden;
+            width: 100%;
+            height: auto; /* Força altura automática */
         }
 
         .item-card-header {
@@ -276,16 +291,17 @@
         }
 
         .status-dot {
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
         }
         .status-dot.green { background-color: var(--primary); }
         .status-dot.amber { background-color: var(--accent-amber); }
         .status-dot.rose { background-color: var(--accent-rose); }
+        .status-dot.purple { background-color: var(--accent-purple); }
 
         .item-title {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 800;
             color: #ffffff;
             word-break: break-all;
@@ -302,47 +318,49 @@
         }
 
         .item-value-label {
-            font-size: 9px;
+            font-size: 8px;
             color: var(--text-muted);
             font-weight: 700;
             text-transform: uppercase;
         }
 
         .item-value-main {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
             color: #e2e8f0;
         }
 
         .info-grid {
             background-color: #020617;
-            padding: 12px;
-            border-radius: 12px;
+            padding: 10px;
+            border-radius: 10px;
             display: grid;
             grid-template-cols: 1fr 1fr;
-            gap: 8px;
-            font-size: 12px;
+            gap: 6px;
+            font-size: 11px;
         }
 
         .info-grid-3 {
             background-color: #020617;
-            padding: 12px;
-            border-radius: 12px;
+            padding: 10px;
+            border-radius: 10px;
             display: grid;
             grid-template-cols: 1fr 1fr 1fr;
             gap: 8px;
             font-size: 12px;
             text-align: center;
+            height: auto;
         }
 
         .info-cell {
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
         }
 
         .info-grid-label {
-            font-size: 9px;
+            font-size: 8px;
             color: var(--text-muted);
             font-weight: 700;
             text-transform: uppercase;
@@ -356,6 +374,7 @@
         }
         .info-grid-value.teal { color: var(--secondary); }
         .info-grid-value.emerald { color: var(--primary); }
+        .info-grid-value.purple { color: var(--accent-purple); }
 
         .info-row {
             display: flex;
@@ -366,14 +385,31 @@
         .info-row span:first-child { color: var(--text-muted); }
         .info-row span:last-child { font-weight: 700; color: #cbd5e1; }
 
+        /* Progress Bar para Objetivos de Poupança */
+        .progress-container {
+            width: 100%;
+            background-color: rgba(51, 65, 85, 0.4);
+            height: 6px;
+            border-radius: 999px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+            border-radius: 999px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
         /* --- CONTROLES DE AÇÕES DOS CARTÕES --- */
         .card-actions {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            padding-top: 12px;
+            gap: 10px;
+            padding-top: 10px;
             border-top: 1px solid rgba(51, 65, 85, 0.4);
-            font-size: 12px;
+            font-size: 11px;
         }
 
         @media (min-width: 480px) {
@@ -411,9 +447,9 @@
         .btn-action {
             flex: 1;
             min-width: 65px;
-            padding: 8px 6px;
+            padding: 6px;
             border-radius: 8px;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 700;
             cursor: pointer;
             border: none;
@@ -424,22 +460,22 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-height: 32px;
+            min-height: 30px;
         }
 
         .btn-action.pay {
-            flex: 1.4 1 auto;
+            flex: 1.3 1 auto;
         }
 
         @media (min-width: 480px) {
             .btn-action {
                 flex: none;
-                min-width: 80px;
-                padding: 8px 12px;
+                min-width: 75px;
+                padding: 8px 10px;
             }
             .btn-action.pay {
                 flex: none;
-                min-width: 120px;
+                min-width: 110px;
             }
         }
 
@@ -449,7 +485,7 @@
 
         /* --- ELEMENTOS DO LIVRO DIÁRIO --- */
         .journal-badge {
-            font-size: 9px;
+            font-size: 8px;
             font-weight: 800;
             padding: 2px 6px;
             border-radius: 4px;
@@ -467,14 +503,15 @@
             align-items: center;
             justify-content: space-between;
             background-color: rgba(15, 23, 42, 0.4);
-            border: 1px dashed var(--border-color);
-            padding: 12px 16px;
-            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            padding: 12px 14px;
+            border-radius: 14px;
             gap: 12px;
+            width: 100%;
         }
 
         .margin-controller-label {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 700;
             color: var(--text-muted);
             text-transform: uppercase;
@@ -490,8 +527,8 @@
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
             color: #ffffff;
-            width: 28px;
-            height: 28px;
+            width: 26px;
+            height: 26px;
             border-radius: 8px;
             display: flex;
             align-items: center;
@@ -509,29 +546,29 @@
         }
 
         .margin-display-value {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 800;
             color: var(--secondary);
-            min-width: 45px;
+            min-width: 40px;
             text-align: center;
         }
 
-        /* --- NAVEGAÇÃO INFERIOR --- */
+        /* --- NAVEGAÇÃO INFERIOR RESPONSIVA DE 6 ABAS --- */
         nav {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            background-color: rgba(15, 23, 42, 0.9);
+            background-color: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-top: 1px solid var(--border-color);
-            padding: 8px 8px 12px 8px;
+            padding: 8px 4px 12px 4px;
             display: flex;
-            justify-content: space-around;
+            justify-content: space-between;
             align-items: center;
             z-index: 40;
-            gap: 2px;
+            gap: 1px;
         }
 
         .nav-btn {
@@ -542,26 +579,28 @@
             align-items: center;
             color: var(--text-muted);
             cursor: pointer;
-            width: 58px;
+            flex: 1;
+            min-width: 0;
         }
 
         .nav-btn.active { color: var(--primary); }
-        .nav-btn span { font-size: 9px; font-weight: 700; margin-top: 4px; }
-        .nav-btn-icon { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.5; }
+        .nav-btn span { font-size: 8px; font-weight: 700; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; text-align: center; }
+        .nav-btn-icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.5; }
 
         .nav-add-btn {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             border: none;
-            border-radius: 14px;
+            border-radius: 12px;
             color: #020617;
             display: flex;
             align-items: center;
             justify-content: center;
-            transform: translateY(-12px);
-            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+            transform: translateY(-10px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
             flex-shrink: 0;
+            margin: 0 2px;
         }
 
         /* --- MODAL --- */
@@ -587,37 +626,31 @@
             width: 100%;
             max-width: 448px;
             border-radius: 24px 24px 0 0;
-            padding: 24px;
+            padding: 20px;
             border: 1px solid var(--border-color);
             transform: translateY(100%);
             transition: transform 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
         }
         .modal-overlay.open .modal-container { transform: translateY(0); }
 
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 16px; }
-        .modal-title { font-size: 16px; font-weight: 700; color: #ffffff; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 14px; }
+        .modal-title { font-size: 15px; font-weight: 700; color: #ffffff; }
         .modal-close { background: none; border: none; color: var(--text-muted); cursor: pointer; }
 
-        .modal-tabs { display: flex; background-color: var(--bg-main); padding: 4px; border-radius: 12px; margin-bottom: 16px; gap: 4px; }
-        .modal-tab-btn { flex: 1; background: none; border: none; color: var(--text-muted); font-size: 12px; font-weight: 700; padding: 8px; border-radius: 8px; cursor: pointer; }
+        .modal-tabs { display: flex; background-color: var(--bg-main); padding: 4px; border-radius: 12px; margin-bottom: 14px; gap: 4px; flex-wrap: wrap; }
+        .modal-tab-btn { flex: 1; min-width: 80px; background: none; border: none; color: var(--text-muted); font-size: 10px; font-weight: 700; padding: 6px; border-radius: 8px; cursor: pointer; }
         .modal-tab-btn.active { background-color: var(--primary); color: #020617; }
 
         /* Formulários */
-        .form-group { margin-bottom: 14px; }
-        .form-grid-2 { display: grid; grid-template-cols: 1fr 1fr; gap: 12px; }
-        .form-label { display: block; font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
-        .form-control { width: 100%; background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; color: #ffffff; font-size: 14px; outline: none; }
+        .form-group { margin-bottom: 12px; }
+        .form-grid-2 { display: grid; grid-template-cols: 1fr 1fr; gap: 10px; }
+        .form-label { display: block; font-size: 9px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+        .form-control { width: 100%; background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px; color: #ffffff; font-size: 13px; outline: none; }
 
         .btn-submit {
-            width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border: none; border-radius: 12px; color: #020617; font-size: 13px; font-weight: 800; text-transform: uppercase; cursor: pointer; margin-top: 12px;
-        }
-
-        .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background-color: #0f172a; color: var(--primary); font-size: 12px; font-weight: 700; padding: 12px 20px; border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.2); z-index: 100; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
-        .toast.show { opacity: 1; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+            width: 100%; padding: 12px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border: none; border-radius: 10px; color: #020617; font-size: 12px; font-weight: 800; text-transform: uppercase; cursor: pointer; margin-top: 10px;
         }
     </style>
 </head>
@@ -634,6 +667,7 @@
         <div class="header-badge" id="current-badge-date">Mês Corrente</div>
     </header>
 
+    <!-- Indicador de Segurança Local com Botão Exportar Excel -->
     <div id="sync-status-banner" class="sync-banner">
         <div class="sync-banner-text">
             <span class="sync-dot"></span>
@@ -648,8 +682,10 @@
     </div>
 
     <main id="main-content">
-        </main>
+        <!-- Injetado Dinamicamente pelo script em formato de fluxo flexível vertical -->
+    </main>
 
+    <!-- BARRA DE NAVEGAÇÃO SUPER ADAPTATIVA DE 6 SEÇÕES -->
     <nav>
         <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn active">
             <svg class="nav-btn-icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
@@ -659,19 +695,28 @@
             <svg class="nav-btn-icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
             <span>Cartões</span>
         </button>
-        <button onclick="switchTab('partilhas')" id="nav-partilhas" class="nav-btn">
-            <svg class="nav-btn-icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-            <span>Partilhas</span>
+        <button onclick="switchTab('poupancas')" id="nav-poupancas" class="nav-btn">
+            <svg class="nav-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <span>Poupar</span>
+        </button>
+        <button onclick="openAddModal()" class="nav-add-btn">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="3.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+        </button>
+        <button onclick="switchTab('receitas')" id="nav-receitas" class="nav-btn">
+            <svg class="nav-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+            <span>Ganhos</span>
+        </button>
+        <button onclick="switchTab('diarios')" id="nav-diarios" class="nav-btn">
+            <svg class="nav-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+            <span>Caixa</span>
         </button>
         <button onclick="switchTab('diario')" id="nav-diario" class="nav-btn">
             <svg class="nav-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
             <span>Diário</span>
         </button>
-        <button onclick="openAddModal()" class="nav-add-btn">
-            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-        </button>
     </nav>
 
+    <!-- MODAL PRINCIPAL COMPACTO -->
     <div id="modal" class="modal-overlay" onclick="handleOverlayClick(event)">
         <div class="modal-container">
             <div class="modal-header">
@@ -681,8 +726,11 @@
                 </button>
             </div>
             <div class="modal-tabs">
-                <button type="button" onclick="setModalType('cartao')" id="m-tab-cartao" class="modal-tab-btn active">Cartão/Despesa</button>
+                <button type="button" onclick="setModalType('cartao')" id="m-tab-cartao" class="modal-tab-btn active">Cartão</button>
+                <button type="button" onclick="setModalType('poupanca')" id="m-tab-poupanca" class="modal-tab-btn">Poupança</button>
+                <button type="button" onclick="setModalType('receita')" id="m-tab-receita" class="modal-tab-btn">Ganho</button>
                 <button type="button" onclick="setModalType('partilha')" id="m-tab-partilha" class="modal-tab-btn">Partilha</button>
+                <button type="button" onclick="setModalType('diario')" id="m-tab-diario" class="modal-tab-btn">Gasto Diário</button>
             </div>
             <form id="modal-form" onsubmit="saveRecord(event)">
                 <div id="form-fields"></div>
@@ -691,6 +739,7 @@
         </div>
     </div>
 
+    <!-- MODAL DE ADIANTAMENTO RÁPIDO (DÉBITO) -->
     <div id="pay-modal" class="modal-overlay" onclick="handlePayOverlayClick(event)">
         <div class="modal-container" style="border-radius: 24px; padding: 24px;">
             <div class="modal-header">
@@ -712,10 +761,14 @@
 
     <div id="toast" class="toast"><span id="toast-msg">Salvo!</span></div>
 
+    <!-- SCRIPT FINANÇAS LOCAIS -->
     <script>
-        // 🛡️ DADOS INICIAIS VAZIOS (Para privacidade por omissão no seu GitHub público)
+        // 🛡️ LISTAS INICIAIS VAZIAS PARA PRIVACIDADE NO GITHUB PÚBLICO
         const initialCards = [];
         const initialLoans = [];
+        const initialSavings = [];
+        const initialIncomes = [];
+        const initialDailyExpenses = [];
         const initialHistory = [
             { id: 'sys-init', date: new Date().toLocaleString('pt-BR'), type: 'criacao', description: 'Sistema de Livro Diário inicializado com sucesso.', amount: 0 }
         ];
@@ -724,11 +777,15 @@
         let state = {
             cards: JSON.parse(localStorage.getItem('w_cards_exact_v2')) || initialCards,
             loans: JSON.parse(localStorage.getItem('w_loans_exact_v2')) || initialLoans,
+            savings: JSON.parse(localStorage.getItem('w_savings_exact_v2')) || initialSavings,
+            incomes: JSON.parse(localStorage.getItem('w_incomes_exact_v2')) || initialIncomes,
+            dailyExpenses: JSON.parse(localStorage.getItem('w_daily_v2')) || initialDailyExpenses,
             history: JSON.parse(localStorage.getItem('w_history_exact_v2')) || initialHistory,
             currentTab: 'dashboard',
             modalType: 'cartao',
             editingId: null,
-            safetyMargin: parseFloat(localStorage.getItem('w_safety_margin_v2')) !== null && !isNaN(parseFloat(localStorage.getItem('w_safety_margin_v2'))) ? parseFloat(localStorage.getItem('w_safety_margin_v2')) : 0.25 // Margem padrão de 25% (0.25)
+            safetyMargin: parseFloat(localStorage.getItem('w_safety_margin_v2')) !== null && !isNaN(parseFloat(localStorage.getItem('w_safety_margin_v2'))) ? parseFloat(localStorage.getItem('w_safety_margin_v2')) : 0.25,
+            dailyTeto: parseFloat(localStorage.getItem('w_daily_teto_v2')) || 200.00
         };
 
         function getRealTodayString() {
@@ -744,8 +801,12 @@
         function saveState() {
             localStorage.setItem('w_cards_exact_v2', JSON.stringify(state.cards));
             localStorage.setItem('w_loans_exact_v2', JSON.stringify(state.loans));
+            localStorage.setItem('w_savings_exact_v2', JSON.stringify(state.savings));
+            localStorage.setItem('w_incomes_exact_v2', JSON.stringify(state.incomes));
+            localStorage.setItem('w_daily_v2', JSON.stringify(state.dailyExpenses));
             localStorage.setItem('w_history_exact_v2', JSON.stringify(state.history));
             localStorage.setItem('w_safety_margin_v2', state.safetyMargin.toString());
+            localStorage.setItem('w_daily_teto_v2', state.dailyTeto.toString());
             localStorage.setItem('simulated_today', simulatedTodayStr);
         }
 
@@ -782,32 +843,31 @@
             renderActiveTab();
         }
 
-        // Ajuste dinâmico da margem de segurança (+ ou - 5%)
         window.adjustSafetyMargin = function(increment) {
             let currentPercentage = Math.round(state.safetyMargin * 100);
             let newPercentage = currentPercentage + (increment ? 5 : -5);
-            
-            // Limitador seguro (De 0% até 100%)
             if (newPercentage < 0) newPercentage = 0;
             if (newPercentage > 100) newPercentage = 100;
-            
             state.safetyMargin = newPercentage / 100;
             saveState();
             renderActiveTab();
             showToast(`Margem de segurança ajustada para ${newPercentage}%`);
         };
 
+        window.updateDailyTeto = function(val) {
+            state.dailyTeto = parseFloat(val) || 0;
+            saveState();
+            renderActiveTab();
+            showToast(`Teto semanal diário ajustado!`);
+        };
+
         // --- CALCULA A DATA DE VENCIMENTO DO PRÓXIMO CICLO COM ROLLOVER INTELIGENTE ---
         function getNextDueDate(dueDay, today) {
             let year = today.getFullYear();
-            let month = today.getMonth(); // 0-11
-            
+            let month = today.getMonth();
             let candidate = new Date(year, month, dueDay, 0, 0, 0);
-            
             const diffTime = candidate - today;
             const diffDays = diffTime / (1000 * 60 * 60 * 24);
-            
-            // Rollover protetor para que a meta não dobre se faltar menos de 7 dias para vencer
             if (candidate < today || diffDays < 7) {
                 candidate = new Date(year, month + 1, dueDay, 0, 0, 0);
             }
@@ -816,19 +876,31 @@
 
         function runCalculations() {
             const today = new Date(simulatedTodayStr + 'T00:00:00');
-            const cardLoans = { NIO: 0, MP: 0, SAN: 0, PP: 0 };
 
+            // 1. Receitas Totais do Mês
+            const totalMonthlyIncome = state.incomes.reduce((sum, i) => sum + parseFloat(i.value || 0), 0);
+            const weeklyIncome = totalMonthlyIncome / 4.33;
+
+            // 2. Partilhas / Parcerias ativas
+            const cardLoans = { NIO: 0, MP: 0, SAN: 0, PP: 0 };
             state.loans.forEach(l => {
                 cardLoans.MP += parseFloat(l.MP || 0);
                 cardLoans.PP += parseFloat(l.PP || 0);
                 cardLoans.SAN += parseFloat(l.SAN || 0);
                 cardLoans.NIO += parseFloat(l.NIO || 0);
             });
+            const totalEmprestimos = Object.values(cardLoans).reduce((a, b) => a + b, 0);
 
-            let totalWeeklyMeta = 0;
+            // 3. Faturas dos Cartões e Adiantamentos
+            let totalCardsBill = 0;
             let totalPrepaid = 0;
+            let totalWeeklyFaturas = 0;
 
             const processedCards = state.cards.map(c => {
+                const prepaidAmount = parseFloat(c.prepaid || 0);
+                totalPrepaid += prepaidAmount;
+                totalCardsBill += c.totalBill;
+
                 let loansOnThisCard = 0;
                 const nameUpper = c.name.toUpperCase();
                 
@@ -837,60 +909,107 @@
                 else if (nameUpper.includes('SANTANDER') || nameUpper.includes('SAN')) loansOnThisCard = cardLoans.SAN;
                 else if (nameUpper.includes('PICPAY') || nameUpper.includes('PP')) loansOnThisCard = cardLoans.PP;
 
-                // Captura o valor já adiantado/pago via débito ou pix
-                const prepaidAmount = parseFloat(c.prepaid || 0);
-                totalPrepaid += prepaidAmount;
-
-                // A parcela líquida é: Total - O que os devedores devem - O que já adiantou via débito/pix
                 let myShare = c.totalBill - loansOnThisCard - prepaidAmount;
                 if (myShare < 0) myShare = 0;
                 
                 const computedDueDate = getNextDueDate(c.dueDay, today);
-                
                 const diffTime = computedDueDate - today;
                 let diffDays = diffTime / (1000 * 60 * 60 * 24);
                 let calculatedWeeks = diffDays / 7;
-                
-                if (calculatedWeeks < 1.0) {
-                    calculatedWeeks = 1.0; 
-                }
+                if (calculatedWeeks < 1.0) calculatedWeeks = 1.0;
 
                 const weeklyContribution = myShare / calculatedWeeks;
-                totalWeeklyMeta += weeklyContribution;
+                totalWeeklyFaturas += weeklyContribution;
 
                 return {
-                    ...c, 
-                    loansTotal: loansOnThisCard, 
+                    ...c,
+                    loansTotal: loansOnThisCard,
                     prepaidAmount,
-                    myShare, 
+                    myShare,
                     computedDueDate,
-                    daysRemaining: diffDays, 
-                    calculatedWeeks: calculatedWeeks, 
+                    daysRemaining: diffDays,
+                    calculatedWeeks,
                     weeklyTarget: weeklyContribution
                 };
             });
 
-            const baseWeeklyMeta = totalWeeklyMeta;
-            // Aplica a margem de segurança configurável do estado
-            const marginAddition = totalWeeklyMeta * state.safetyMargin; 
-            const totalWeeklyMetaWithMargin = totalWeeklyMeta * (1 + state.safetyMargin);
+            // 4. Objetivos de Poupança Semanais
+            let totalWeeklySavingsGoal = 0;
+            let totalSavedAmount = 0;
+            let totalSavingsGoal = 0;
 
-            return { 
-                processedCards, 
+            const processedSavings = state.savings.map(s => {
+                const currentSaved = parseFloat(s.saved || 0);
+                const target = parseFloat(s.target || 0);
+                totalSavedAmount += currentSaved;
+                totalSavingsGoal += target;
+
+                const limitDate = new Date(s.limitDate + 'T00:00:00');
+                const diffTime = limitDate - today;
+                const diffDays = diffTime / (1000 * 60 * 60 * 24);
+                let calculatedWeeks = diffDays / 7;
+                if (calculatedWeeks < 1.0) calculatedWeeks = 1.0;
+
+                const neededToSave = target - currentSaved;
+                let weeklyContribution = neededToSave > 0 ? (neededToSave / calculatedWeeks) : 0;
+                totalWeeklySavingsGoal += weeklyContribution;
+
+                const progressPercent = Math.min(100, Math.round((currentSaved / target) * 100)) || 0;
+
+                return {
+                    ...s,
+                    currentSaved,
+                    target,
+                    limitDateObj: limitDate,
+                    calculatedWeeks,
+                    progressPercent,
+                    weeklyTarget: weeklyContribution
+                };
+            });
+
+            // 5. Gastos Diários Flutuantes
+            const currentWeekDailyTotal = state.dailyExpenses.reduce((sum, e) => sum + parseFloat(e.amount || 0), 0);
+            const remainingDailyTeto = Math.max(0, state.dailyTeto - currentWeekDailyTotal);
+
+            // 6. Consolidação Geral
+            const baseWeeklyMeta = totalWeeklyFaturas + totalWeeklySavingsGoal;
+            const marginAddition = baseWeeklyMeta * state.safetyMargin;
+            const totalWeeklyMetaWithMargin = baseWeeklyMeta + marginAddition;
+
+            // Saldo Livre Mensal Real Estimado (Receitas - Despesas de Cartão + O que vai receber de partilhas - Gasto Flutuante)
+            const estimatedFreeMonthlySalary = totalMonthlyIncome - totalCardsBill + totalEmprestimos - (state.dailyTeto * 4.33);
+
+            const incomeCommitmentPercent = weeklyIncome > 0 ? Math.min(100, Math.round((totalWeeklyMetaWithMargin / weeklyIncome) * 100)) : 0;
+
+            return {
+                processedCards,
+                processedSavings,
                 baseWeeklyMeta,
                 marginAddition,
-                totalWeeklyMeta: totalWeeklyMetaWithMargin, 
-                cardLoans,
-                totalPrepaid
+                totalWeeklyMeta: totalWeeklyMetaWithMargin,
+                totalPrepaid,
+                totalMonthlyIncome,
+                weeklyIncome,
+                estimatedFreeMonthlySalary,
+                incomeCommitmentPercent,
+                currentWeekDailyTotal,
+                remainingDailyTeto,
+                totalSavedAmount,
+                totalSavingsGoal,
+                totalCardsBill,
+                totalEmprestimos,
+                cardLoans
             };
         }
 
         function switchTab(tab) {
             state.currentTab = tab;
-            ['nav-dashboard', 'nav-cartoes', 'nav-partilhas', 'nav-diario'].forEach(id => {
-                document.getElementById(id).classList.remove('active');
+            ['nav-dashboard', 'nav-cartoes', 'nav-poupancas', 'nav-receitas', 'nav-diarios', 'nav-diario'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('active');
             });
-            document.getElementById(`nav-${tab}`).classList.add('active');
+            const activeEl = document.getElementById(`nav-${tab}`);
+            if (activeEl) activeEl.classList.add('active');
             renderActiveTab();
         }
 
@@ -904,80 +1023,140 @@
                 renderDashboard(container, data);
             } else if (state.currentTab === 'cartoes') {
                 renderCartoes(container, data);
-            } else if (state.currentTab === 'partilhas') {
-                renderPartilhas(container, data);
+            } else if (state.currentTab === 'poupancas') {
+                renderPoupancas(container, data);
+            } else if (state.currentTab === 'receitas') {
+                renderReceitasEPartilhas(container, data);
+            } else if (state.currentTab === 'diarios') {
+                renderGastosDiarios(container, data);
             } else if (state.currentTab === 'diario') {
                 renderDiario(container);
             }
         }
 
+        // --- FLUXO ESTRUTURAL COMPLETO E SEGURO DO PAINEL PRINCIPAL ---
         function renderDashboard(container, data) {
-            const totalFaturasTotal = state.cards.reduce((sum, c) => sum + c.totalBill, 0);
-            const totalEmprestimos = Object.values(data.cardLoans).reduce((a, b) => a + b, 0);
             const marginPercent = Math.round(state.safetyMargin * 100);
 
+            // Cria um fluxo de elementos verticais 100% isolado por CSS Flexbox
             container.innerHTML = `
-                <div class="meta-card">
-                    <span class="meta-card-label">Meta Semanal (Com Margem)</span>
-                    <h2 class="meta-card-value">${formatBRL(data.totalWeeklyMeta)}</h2>
-                    <p class="meta-card-desc">Cálculo contínuo com acréscimo de +${marginPercent}% de margem.</p>
-                </div>
-                
-                <div class="margin-controller-container">
-                    <span class="margin-controller-label">Margem de Segurança:</span>
-                    <div class="margin-controls-group">
-                        <div class="btn-margin-adjust" onclick="adjustSafetyMargin(false)">-</div>
-                        <span class="margin-display-value">${marginPercent}%</span>
-                        <div class="btn-margin-adjust" onclick="adjustSafetyMargin(true)">+</div>
+                <div class="dashboard-flow">
+                    <!-- 1. VALOR DA META SEMANAL DINÂMICA COMPLETA -->
+                    <div class="meta-card">
+                        <span class="meta-card-label">Sua Meta Semanal Geral</span>
+                        <h2 class="meta-card-value">${formatBRL(data.totalWeeklyMeta)}</h2>
+                        <p class="meta-card-desc">Faturas + Objetivos de Poupança + Margem (+${marginPercent}%)</p>
                     </div>
-                </div>
 
-                <div class="summary-grid">
-                    <div class="summary-card">
-                        <span class="summary-label">Meta Faturas (Base)</span>
-                        <span class="summary-value" style="font-size: 15px; color: #f1f5f9;">${formatBRL(data.baseWeeklyMeta)}</span>
-                    </div>
-                    <div class="summary-card">
-                        <span class="summary-label">Margem de Segurança (+${marginPercent}%)</span>
-                        <span class="summary-value" style="font-size: 15px; color: var(--secondary);">${formatBRL(data.marginAddition)}</span>
-                    </div>
-                </div>
-
-                <div class="summary-grid" style="grid-template-cols: 1fr 1fr 1fr; gap: 8px;">
-                    <div class="summary-card" style="padding: 12px 8px;">
-                        <span class="summary-label" style="font-size: 8px;">Faturas</span>
-                        <span class="summary-value" style="font-size: 13px;">${formatBRL(totalFaturasTotal)}</span>
-                    </div>
-                    <div class="summary-card" style="padding: 12px 8px;">
-                        <span class="summary-label" style="font-size: 8px; color: var(--secondary);">Devedores</span>
-                        <span class="summary-value" style="font-size: 13px; color: var(--secondary);">${formatBRL(totalEmprestimos)}</span>
-                    </div>
-                    <div class="summary-card" style="padding: 12px 8px; background-color: rgba(20, 184, 166, 0.08); border-color: rgba(20, 184, 166, 0.2);">
-                        <span class="summary-label" style="font-size: 8px; color: var(--secondary);">Adiantado</span>
-                        <span class="summary-value" style="font-size: 13px; color: var(--secondary);">${formatBRL(data.totalPrepaid)}</span>
-                    </div>
-                </div>
-                
-                <div class="list-container">
-                    <h3 class="section-title">Esforço Semanal Requerido</h3>
-                    ${state.cards.length === 0 ? `
-                        <div class="item-card" style="text-align: center; padding: 24px; color: var(--text-muted); border: 1px dashed var(--border-color);">
-                            Nenhum cartão adicionado. Clique no botão "+" abaixo para começar!
+                    <!-- 2. BALANÇO DE RECEITA E COMPROMETIMENTO -->
+                    <div class="summary-grid">
+                        <div class="summary-card">
+                            <span class="summary-label">Salário Livre Estimado</span>
+                            <span class="summary-value" style="color: var(--primary);">${formatBRL(data.estimatedFreeMonthlySalary)}</span>
                         </div>
-                    ` : data.processedCards.map(c => {
-                        let color = c.daysRemaining < 0 ? 'rose' : (c.daysRemaining <= 7 ? 'amber' : 'green');
-                        return `
-                            <div class="item-card" style="flex-direction: row; justify-content: space-between; align-items: center; padding: 14px 16px;">
-                                <div>
-                                    <div class="item-title-wrapper"><span class="status-dot ${color}"></span><span class="item-title">${c.name}</span></div>
-                                    <span class="item-subtitle" style="display: block; margin-left: 18px;">Ciclo Ativo: ${c.calculatedWeeks.toFixed(2)}s restantes (${Math.ceil(c.daysRemaining)} dias)</span>
-                                </div>
-                                <div style="text-align: right;">
-                                    <span class="item-value-main" style="color: var(--primary); font-size: 15px; font-weight: 800;">${formatBRL(c.weeklyTarget)}/sem</span>
-                                </div>
+                        <div class="summary-card">
+                            <span class="summary-label">Comprometido Semanal</span>
+                            <span class="summary-value" style="color: ${data.incomeCommitmentPercent > 70 ? 'var(--accent-rose)' : 'var(--accent-amber)'};">${data.incomeCommitmentPercent}% da renda</span>
+                        </div>
+                    </div>
+
+                    <!-- 3. CONTROLE DE CAIXA DE GASTOS DIÁRIOS FLUTUANTES (Opção 3 - TOTALMENTE ISOLADO) -->
+                    <div class="item-card" style="border-color: rgba(20, 184, 166, 0.4); background: linear-gradient(135deg, var(--bg-card), rgba(2, 6, 23, 0.6));">
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(51, 65, 85, 0.4); padding-bottom: 8px; flex-wrap: wrap; gap: 8px; width: 100%;">
+                            <span class="margin-controller-label" style="color: var(--secondary); white-space: normal;">Controle de Gastos Diários</span>
+                            <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                                <span style="font-size: 8px; color: var(--text-muted);">Teto:</span>
+                                <input type="number" class="form-control" style="width: 70px; padding: 4px; font-size: 11px; height: 24px;" value="${state.dailyTeto}" onchange="updateDailyTeto(this.value)">
                             </div>
-                        `;
-                    }).join('')}
+                        </div>
+                        
+                        <div style="margin-top: 4px; width: 100%;">
+                            <div class="progress-container" style="height: 8px;"><div class="progress-bar" style="width: ${Math.min(100, Math.round((data.currentWeekDailyTotal / state.dailyTeto) * 100))}%; background: var(--secondary)"></div></div>
+                        </div>
+
+                        <div class="info-grid-3" style="background: transparent; padding: 8px 0 0 0; gap: 4px; width: 100%;">
+                            <div class="info-cell">
+                                <span class="info-grid-label" style="font-size: 7px;">Teto Semanal</span>
+                                <span class="info-grid-value" style="color: #cbd5e1; font-size: 10px;">${formatBRL(state.dailyTeto)}</span>
+                            </div>
+                            <div class="info-cell">
+                                <span class="info-grid-label" style="font-size: 7px;">Gasto na Semana</span>
+                                <span class="info-grid-value" style="color: var(--accent-rose); font-size: 10px;">${formatBRL(data.currentWeekDailyTotal)}</span>
+                            </div>
+                            <div class="info-cell">
+                                <span class="info-grid-label" style="font-size: 7px; color: var(--primary);">Disponível</span>
+                                <span class="info-grid-value" style="color: var(--primary); font-weight: 800; font-size: 10px;">${formatBRL(data.remainingDailyTeto)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. CONTROLE INTERATIVO DA MARGEM DE SEGURANÇA -->
+                    <div class="margin-controller-container">
+                        <span class="margin-controller-label">Margem de Segurança:</span>
+                        <div class="margin-controls-group">
+                            <div class="btn-margin-adjust" onclick="adjustSafetyMargin(false)">-</div>
+                            <span class="margin-display-value">${marginPercent}%</span>
+                            <div class="btn-margin-adjust" onclick="adjustSafetyMargin(true)">+</div>
+                        </div>
+                    </div>
+
+                    <!-- 5. RESUMO GERAL DAS CONTAS -->
+                    <div class="summary-grid" style="grid-template-cols: 1fr 1fr 1fr; gap: 8px;">
+                        <div class="summary-card" style="padding: 10px 6px;">
+                            <span class="summary-label" style="font-size: 8px;">Faturas Totais</span>
+                            <span class="summary-value" style="font-size: 13px;">${formatBRL(data.totalCardsBill)}</span>
+                        </div>
+                        <div class="summary-card" style="padding: 10px 6px;">
+                            <span class="summary-label" style="font-size: 8px; color: var(--secondary)">A Receber</span>
+                            <span class="summary-value" style="font-size: 13px; color: var(--secondary);">${formatBRL(data.totalEmprestimos)}</span>
+                        </div>
+                        <div class="summary-card" style="padding: 10px 6px; background-color: rgba(20, 184, 166, 0.05);">
+                            <span class="summary-label" style="font-size: 8px; color: var(--primary)">Renda Mensal</span>
+                            <span class="summary-value" style="font-size: 13px; color: var(--primary);">${formatBRL(data.totalMonthlyIncome)}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 6. ESFORÇO SEMANAL REQUERIDO -->
+                    <div class="list-container">
+                        <h3 class="section-title">Esforço Semanal Requerido</h3>
+                        ${state.cards.length === 0 && state.savings.length === 0 ? `
+                            <div class="item-card" style="text-align: center; padding: 24px; color: var(--text-muted); border: 1px dashed var(--border-color);">
+                                Nenhum cartão ou objetivo adicionado. Clique no botão "+" abaixo para começar!
+                            </div>
+                        ` : `
+                            ${data.processedCards.map(c => {
+                                let color = c.daysRemaining < 0 ? 'rose' : (c.daysRemaining <= 7 ? 'amber' : 'green');
+                                let rawWeeks = c.calculatedWeeks;
+                                let formattedWeeks = rawWeeks % 1 === 0 ? rawWeeks.toFixed(0) : rawWeeks.toFixed(1);
+                                return `
+                                    <div class="item-card" style="flex-direction: row; justify-content: space-between; align-items: center; padding: 12px 14px;">
+                                        <div>
+                                            <div class="item-title-wrapper"><span class="status-dot ${color}"></span><span class="item-title">${c.name}</span></div>
+                                            <span class="item-subtitle" style="display: block; margin-left: 18px;">Faltam ${formattedWeeks} sem</span>
+                                        </div>
+                                        <div style="text-align: right;">
+                                            <span class="item-value-main" style="color: var(--primary); font-weight: 800;">${formatBRL(c.weeklyTarget)}/sem</span>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                            ${data.processedSavings.map(s => {
+                                let rawWeeks = s.calculatedWeeks;
+                                let formattedWeeks = rawWeeks % 1 === 0 ? rawWeeks.toFixed(0) : rawWeeks.toFixed(1);
+                                return `
+                                    <div class="item-card" style="flex-direction: row; justify-content: space-between; align-items: center; padding: 12px 14px; border-color: rgba(139, 92, 246, 0.4); background: linear-gradient(135deg, var(--bg-card), #080314);">
+                                        <div>
+                                            <div class="item-title-wrapper"><span class="status-dot purple"></span><span class="item-title">${s.name} (Poupar)</span></div>
+                                            <span class="item-subtitle" style="display: block; margin-left: 18px;">Meta em ${formattedWeeks} sem</span>
+                                        </div>
+                                        <div style="text-align: right;">
+                                            <span class="item-value-main" style="color: var(--accent-purple); font-weight: 800;">${formatBRL(s.weeklyTarget)}/sem</span>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        `}
+                    </div>
                 </div>
             `;
         }
@@ -989,59 +1168,29 @@
                         <div class="item-card" style="text-align: center; padding: 24px; color: var(--text-muted); border: 1px dashed var(--border-color);">
                             Nenhum cartão cadastrado. Clique no botão "+" abaixo para adicionar o seu primeiro cartão!
                         </div>
-                    ` : data.processedCards.map(c => `
-                        <div class="item-card">
-                            <div class="item-card-header">
-                                <div>
-                                    <h3 class="item-title">${c.name}</h3>
-                                    <span class="item-subtitle">Próximo Vencimento: ${c.computedDueDate.toLocaleDateString('pt-BR')} (Dia ${c.dueDay})</span>
-                                </div>
-                                <div class="item-value-side"><span class="item-value-label">Total</span><span class="item-value-main">${formatBRL(c.totalBill)}</span></div>
-                            </div>
-                            <div class="info-grid-3">
-                                <div class="info-cell"><span class="info-grid-label">Parcerias</span><span class="info-grid-value teal">${formatBRL(c.loansTotal)}</span></div>
-                                <div class="info-cell"><span class="info-grid-label">Adiantado</span><span class="info-grid-value emerald" style="color: var(--secondary);">${formatBRL(c.prepaidAmount)}</span></div>
-                                <div class="info-cell"><span class="info-grid-label">Líquido em Aberto</span><span class="info-grid-value" style="color: #cbd5e1;">${formatBRL(c.myShare)}</span></div>
-                            </div>
-                            <div class="card-actions">
-                                <span class="meta-base-text">Meta Base: <strong class="meta-base-value">${formatBRL(c.weeklyTarget)}/sem</strong></span>
-                                <div class="action-button-group">
-                                    <button onclick="openPayModal('${c.id}', '${c.name}')" class="btn-action pay">Adiantar (Débito)</button>
-                                    <button onclick="editCard('${c.id}')" class="btn-action edit">Editar</button>
-                                    <button onclick="deleteCard('${c.id}')" class="btn-action delete">Remover</button>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-
-        function renderPartilhas(container, data) {
-            container.innerHTML = `
-                <div class="list-container">
-                    ${state.loans.length === 0 ? `
-                        <div class="item-card" style="text-align: center; padding: 24px; color: var(--text-muted); border: 1px dashed var(--border-color);">
-                            Nenhuma partilha registrada. Clique no botão "+" e mude para a aba de "Partilha" para registrar quem te deve!
-                        </div>
-                    ` : state.loans.map(l => {
-                        const total = parseFloat(l.MP || 0) + parseFloat(l.PP || 0) + parseFloat(l.SAN || 0) + parseFloat(l.NIO || 0);
+                    ` : data.processedCards.map(c => {
+                        let rawWeeks = c.calculatedWeeks;
+                        let formattedWeeks = rawWeeks % 1 === 0 ? rawWeeks.toFixed(0) : rawWeeks.toFixed(1);
                         return `
                             <div class="item-card">
                                 <div class="item-card-header">
-                                    <h3 class="item-title">${l.name}</h3>
-                                    <span class="item-value-main" style="color: var(--secondary);">${formatBRL(total)}</span>
+                                    <div>
+                                        <h3 class="item-title">${c.name}</h3>
+                                        <span class="item-subtitle">Vencimento: Dia ${c.dueDay} (Faltam ${formattedWeeks} sem)</span>
+                                    </div>
+                                    <div class="item-value-side"><span class="item-value-label">Total</span><span class="item-value-main">${formatBRL(c.totalBill)}</span></div>
                                 </div>
-                                <div class="info-grid">
-                                    <div class="info-row"><span>MP:</span><span>${formatBRL(l.MP)}</span></div>
-                                    <div class="info-row"><span>PicPay:</span><span>${formatBRL(l.PP)}</span></div>
-                                    <div class="info-row"><span>Santander:</span><span>${formatBRL(l.SAN)}</span></div>
-                                    <div class="info-row"><span>Nio:</span><span>${formatBRL(l.NIO)}</span></div>
+                                <div class="info-grid-3">
+                                    <div class="info-cell"><span class="info-grid-label">Parcerias (Devedores)</span><span class="info-grid-value teal">${formatBRL(c.loansTotal)}</span></div>
+                                    <div class="info-cell"><span class="info-grid-label">Adiantado</span><span class="info-grid-value emerald" style="color: var(--secondary);">${formatBRL(c.prepaidAmount)}</span></div>
+                                    <div class="info-cell"><span class="info-grid-label">Líquido em Aberto</span><span class="info-grid-value" style="color: #cbd5e1;">${formatBRL(c.myShare)}</span></div>
                                 </div>
-                                <div class="card-actions" style="justify-content: flex-end;">
+                                <div class="card-actions">
+                                    <span class="meta-base-text">Meta Base: <strong class="meta-base-value">${formatBRL(c.weeklyTarget)}/sem</strong></span>
                                     <div class="action-button-group">
-                                        <button onclick="editLoan('${l.id}')" class="btn-action edit">Editar</button>
-                                        <button onclick="deleteLoan('${l.id}')" class="btn-action delete">Remover</button>
+                                        <button onclick="openPayModal('${c.id}', '${c.name}')" class="btn-action pay">Adiantar (Débito)</button>
+                                        <button onclick="editCard('${c.id}')" class="btn-action edit">Editar</button>
+                                        <button onclick="deleteCard('${c.id}')" class="btn-action delete">Remover</button>
                                     </div>
                                 </div>
                             </div>
@@ -1051,17 +1200,170 @@
             `;
         }
 
-        // --- RENDERIZAR O LIVRO DIÁRIO ---
+        function renderPoupancas(container, data) {
+            container.innerHTML = `
+                <div class="list-container">
+                    ${state.savings.length === 0 ? `
+                        <div class="item-card" style="text-align: center; padding: 24px; color: var(--text-muted); border: 1px dashed var(--border-color);">
+                            Nenhum objetivo de poupança cadastrado. Clique no botão "+" abaixo para adicionar sua primeira reserva de viagem ou emergência!
+                        </div>
+                    ` : data.processedSavings.map(s => {
+                        let rawWeeks = s.calculatedWeeks;
+                        let formattedWeeks = rawWeeks % 1 === 0 ? rawWeeks.toFixed(0) : rawWeeks.toFixed(1);
+                        return `
+                            <div class="item-card" style="border-color: rgba(139, 92, 246, 0.4);">
+                                <div class="item-card-header">
+                                    <div>
+                                        <h3 class="item-title" style="color: var(--accent-purple);">${s.name}</h3>
+                                        <span class="item-subtitle">Data limite: ${new Date(s.limitDate + 'T00:00:00').toLocaleDateString('pt-BR')} (${formattedWeeks} sem restantes)</span>
+                                    </div>
+                                    <div class="item-value-side">
+                                        <span class="item-value-label">Alvo</span>
+                                        <span class="item-value-main" style="color: var(--accent-purple);">${formatBRL(s.target)}</span>
+                                    </div>
+                                </div>
+                                <div class="info-grid-3">
+                                    <div class="info-cell"><span class="info-grid-label">Guardado</span><span class="info-grid-value emerald">${formatBRL(s.currentSaved)}</span></div>
+                                    <div class="info-cell"><span class="info-grid-label">Falta</span><span class="info-grid-value" style="color: var(--accent-rose);">${formatBRL(Math.max(0, s.target - s.currentSaved))}</span></div>
+                                    <div class="info-cell"><span class="info-grid-label">Meta Semanal</span><span class="info-grid-value" style="color: var(--accent-purple); font-weight: 800;">${formatBRL(s.weeklyTarget)}</span></div>
+                                </div>
+                                <div>
+                                    <div style="display:flex; justify-content:space-between; font-size:9px; color: var(--text-muted); margin-bottom: 4px;">
+                                        <span>Progresso</span>
+                                        <span>${s.progressPercent}%</span>
+                                    </div>
+                                    <div class="progress-container"><div class="progress-bar" style="width: ${s.progressPercent}%; background: var(--accent-purple)"></div></div>
+                                </div>
+                                <div class="card-actions" style="justify-content: flex-end; padding-top: 8px;">
+                                    <div class="action-button-group">
+                                        <button onclick="quickAddSavings('${s.id}')" class="btn-action pay" style="background-color: rgba(139, 92, 246, 0.15); color: var(--accent-purple); border-color: rgba(139, 92, 246, 0.3);">Poupar +</button>
+                                        <button onclick="editSavings('${s.id}')" class="btn-action edit">Editar</button>
+                                        <button onclick="deleteSavings('${s.id}')" class="btn-action delete">Remover</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        // FUSÃO INTELIGENTE: Ganhos e Partilhas de Devedores na mesma aba!
+        function renderReceitasEPartilhas(container, data) {
+            container.innerHTML = `
+                <!-- SEÇÃO 1: RECEITAS E GANHOS -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <h3 class="section-title" style="margin: 0;">Rendas e Ganhos</h3>
+                </div>
+                <div class="list-container" style="margin-bottom: 24px;">
+                    ${state.incomes.length === 0 ? `
+                        <div class="item-card" style="text-align: center; padding: 16px; color: var(--text-muted); border: 1px dashed var(--border-color);">
+                            Nenhum ganho cadastrado. Use o "+" para adicionar o seu salário!
+                        </div>
+                    ` : state.incomes.map(i => `
+                        <div class="item-card" style="border-color: rgba(16, 185, 129, 0.4); padding: 12px;">
+                            <div class="item-card-header">
+                                <div>
+                                    <h3 class="item-title" style="color: var(--primary);">${i.name}</h3>
+                                    <span class="item-subtitle">Ganho Mensal</span>
+                                </div>
+                                <div class="item-value-side">
+                                    <span class="item-value-main" style="color: var(--primary);">${formatBRL(i.value)}</span>
+                                </div>
+                            </div>
+                            <div class="card-actions" style="justify-content: flex-end; padding-top: 8px; margin-top: 4px;">
+                                <div class="action-button-group">
+                                    <button onclick="editIncome('${i.id}')" class="btn-action edit" style="padding: 4px 8px; min-height: 24px;">Editar</button>
+                                    <button onclick="deleteIncome('${i.id}')" class="btn-action delete" style="padding: 4px 8px; min-height: 24px;">Remover</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <!-- SEÇÃO 2: CONTROLE DE PARTILHAS (DEVEDORES) -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <h3 class="section-title" style="margin: 0;">Partilhas e Parcerias (Devedores)</h3>
+                </div>
+                <div class="list-container">
+                    ${state.loans.length === 0 ? `
+                        <div class="item-card" style="text-align: center; padding: 16px; color: var(--text-muted); border: 1px dashed var(--border-color);">
+                            Nenhum devedor cadastrado. Use o "+" e mude para a aba "Partilha" para registrar quem te deve!
+                        </div>
+                    ` : state.loans.map(l => {
+                        const total = parseFloat(l.MP || 0) + parseFloat(l.PP || 0) + parseFloat(l.SAN || 0) + parseFloat(l.NIO || 0);
+                        return `
+                            <div class="item-card" style="border-color: rgba(20, 184, 166, 0.4);">
+                                <div class="item-card-header">
+                                    <h3 class="item-title" style="color: var(--secondary);">${l.name}</h3>
+                                    <span class="item-value-main" style="color: var(--secondary);">${formatBRL(total)}</span>
+                                </div>
+                                <div class="info-grid">
+                                    <div class="info-row"><span>MP:</span><span>${formatBRL(l.MP)}</span></div>
+                                    <div class="info-row"><span>PicPay:</span><span>${formatBRL(l.PP)}</span></div>
+                                    <div class="info-row"><span>Santander:</span><span>${formatBRL(l.SAN)}</span></div>
+                                    <div class="info-row"><span>Nio:</span><span>${formatBRL(l.NIO)}</span></div>
+                                </div>
+                                <div class="card-actions" style="justify-content: flex-end; padding-top: 8px; margin-top: 4px;">
+                                    <div class="action-button-group">
+                                        <button onclick="editLoan('${l.id}')" class="btn-action edit" style="padding: 4px 8px; min-height: 24px;">Editar</button>
+                                        <button onclick="deleteLoan('${l.id}')" class="btn-action delete" style="padding: 4px 8px; min-height: 24px;">Remover</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function renderGastosDiarios(container, data) {
+            container.innerHTML = `
+                <div class="item-card" style="border-color: rgba(20, 184, 166, 0.4); margin-bottom: 4px;">
+                    <div style="font-size: 11px; font-weight:700; color: var(--secondary); margin-bottom: 6px;">Limite de Caixa da Semana</div>
+                    <div class="progress-container" style="height: 8px;"><div class="progress-bar" style="width: ${Math.min(100, Math.round((data.currentWeekDailyTotal / state.dailyTeto) * 100))}%; background: var(--secondary)"></div></div>
+                    <div style="display:flex; justify-content:space-between; font-size:10px; color: var(--text-muted); margin-top: 6px;">
+                        <span>Gasto: ${formatBRL(data.currentWeekDailyTotal)}</span>
+                        <span>Restante: ${formatBRL(data.remainingDailyTeto)}</span>
+                    </div>
+                </div>
+                
+                <div class="list-container">
+                    <h3 class="section-title">Registro de Gastos Recentes</h3>
+                    ${state.dailyExpenses.length === 0 ? `
+                        <div class="item-card" style="text-align: center; padding: 24px; color: var(--text-muted); border: 1px dashed var(--border-color);">
+                            Nenhum gasto flutuante registrado nesta semana. Clique no botão "+" para registrar!
+                        </div>
+                    ` : state.dailyExpenses.map(e => `
+                        <div class="item-card" style="padding: 12px; border-color: rgba(244, 63, 94, 0.3);">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <h4 class="item-title" style="font-size:12px">${e.name}</h4>
+                                    <span style="font-size:9px; color: var(--text-muted)">${e.date}</span>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <span style="color: var(--accent-rose); font-weight:800; font-size:13px;">${formatBRL(e.amount)}</span>
+                                    <button onclick="deleteDailyExpense('${e.id}')" style="background:none; border:none; color:var(--accent-rose); cursor:pointer">
+                                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // --- RENDERIZAR O LIVRO DIÁRIO (Opção de Limpeza Removida por Segurança) ---
         function renderDiario(container) {
             container.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <div style="margin-bottom: 12px;">
                     <h3 class="section-title" style="margin: 0;">Registro Cronológico de Ações</h3>
-                    <button class="btn-action delete" style="padding: 6px 12px; font-size: 10px; min-width: auto; flex: none" onclick="clearJournal()">Limpar Diário</button>
                 </div>
                 <div class="list-container">
                     ${state.history.length === 0 ? `
                         <div class="item-card" style="text-align: center; padding: 24px; color: var(--text-muted); border: 1px dashed var(--border-color);">
-                            Nenhum registro no diário ainda. Todas as suas despesas e pagamentos aparecerão aqui automaticamente!
+                            Nenhum registro no diário ainda. Todas as suas transações financeiras aparecerão aqui!
                         </div>
                     ` : state.history.map(h => `
                         <div class="item-card" style="padding: 14px; gap: 8px;">
@@ -1081,155 +1383,127 @@
             `;
         }
 
-        // Limpar o diário com confirmação
-        window.clearJournal = function() {
-            if (confirm("Tem certeza de que deseja limpar permanentemente todo o histórico do Livro Diário?")) {
-                state.history = [
-                    { id: 'sys-init', date: new Date().toLocaleString('pt-BR'), type: 'criacao', description: 'Livro Diário limpo pelo usuário.', amount: 0 }
-                ];
-                saveState();
-                renderActiveTab();
-                showToast("Histórico limpo!");
-            }
-        }
-
-        // --- EXPORTAR DADOS DIRETAMENTE PARA EXCEL (.XLSX) COM 3 ABAS ---
+        // --- EXPORTAR EXCEL COMPLETO DE 5 ABAS ---
         window.exportDataToExcel = function() {
-            if (state.cards.length === 0 && state.loans.length === 0 && state.history.length === 0) {
-                showToast("Adicione dados para poder exportar para o Excel!");
-                return;
-            }
-
             try {
                 const calcs = runCalculations();
                 const wb = XLSX.utils.book_new();
 
-                // 1. Criar dados para a primeira aba: "Resumo & Cartões"
+                // 1. Resumo & Cartões
                 const summaryHeader = [
-                    ["GESTOR FINANCEIRO - METAS SEMANAIS"],
-                    ["Data da Exportação", new Date().toLocaleDateString('pt-BR')],
+                    ["SUPER CENTRAL FINANCEIRA - METAS SEMANAIS"],
+                    ["Data de Exportação", new Date().toLocaleDateString('pt-BR')],
                     [],
-                    ["MÉTRICAS GERAIS"],
-                    ["Minha Meta Semanal (Com Margem)", calcs.totalWeeklyMeta],
-                    ["Meta Base (Faturas)", calcs.baseWeeklyMeta],
+                    ["MÉTRICAS SEMANAIS CONSOLIDADAS"],
+                    ["Minha Meta Semanal Geral (Com Margem)", calcs.totalWeeklyMeta],
+                    ["Meta Semanal Base", calcs.baseWeeklyMeta],
                     [`Margem de Segurança Adicional (${Math.round(state.safetyMargin * 100)}%)`, calcs.marginAddition],
-                    ["Faturas Totais Brutas", state.cards.reduce((sum, c) => sum + c.totalBill, 0)],
-                    ["Total de Parcerias (Devedores)", Object.values(calcs.cardLoans).reduce((a, b) => a + b, 0)],
-                    ["Total Pago/Adiantado (Débito)", calcs.totalPrepaid],
+                    ["Total de Faturas de Cartão", calcs.totalCardsBill],
+                    ["Total de Metas de Poupança (Semanal)", state.savings.reduce((sum, s) => sum + (parseFloat(s.target || 0) / 4.33), 0)],
+                    ["Saldo Livre Mensal Real Estimado", calcs.estimatedFreeMonthlySalary],
                     [],
                     ["DETALHE DE CARTÕES & DESPESAS"],
-                    ["Cartão/Despesa", "Fatura Bruta (R$)", "Dia Vencimento", "Próximo Vencimento", "Parcerias (R$)", "Adiantado (R$)", "Líquido em Aberto (R$)", "Semanas Restantes", "Meta Semanal (R$)"]
+                    ["Cartão", "Fatura Bruta (R$)", "Dia Vencimento", "Próximo Vencimento", "Parcerias (R$)", "Adiantado (R$)", "Saldo Restante", "Meta Semanal (R$)"]
                 ];
-
                 calcs.processedCards.forEach(c => {
                     summaryHeader.push([
-                        c.name,
-                        c.totalBill,
-                        c.dueDay,
-                        c.computedDueDate.toLocaleDateString('pt-BR'),
-                        c.loansTotal,
-                        c.prepaidAmount,
-                        c.myShare,
-                        parseFloat(c.calculatedWeeks.toFixed(2)),
-                        parseFloat(c.weeklyTarget.toFixed(2))
+                        c.name, c.totalBill, c.dueDay, c.computedDueDate.toLocaleDateString('pt-BR'), c.loansTotal, c.prepaidAmount, c.myShare, parseFloat(c.weeklyTarget.toFixed(2))
                     ]);
                 });
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summaryHeader), "Resumo & Cartões");
 
-                const wsSummary = XLSX.utils.aoa_to_sheet(summaryHeader);
-                XLSX.utils.book_append_sheet(wb, wsSummary, "Resumo & Cartões");
+                // 2. Objetivos de Poupança
+                const savingsHeader = [
+                    ["OBJETIVOS DE POUPANÇA E RESERVAS"],
+                    [],
+                    ["Objetivo / Projeto", "Valor Alvo (R$)", "Valor Guardado (R$)", "Valor Restante", "Data Limite", "Meta Semanal Requerida (R$)"]
+                ];
+                calcs.processedSavings.forEach(s => {
+                    savingsHeader.push([
+                        s.name, s.target, s.currentSaved, Math.max(0, s.target - s.currentSaved), s.limitDate, s.weeklyTarget
+                    ]);
+                });
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(savingsHeader), "Objetivos de Poupança");
 
-                // 2. Criar dados para a segunda aba: "Partilhas (Devedores)"
+                // 3. Receitas & Ganhos
+                const incomesHeader = [
+                    ["FONTES DE RENDAS E GANHOS"],
+                    [],
+                    ["Renda / Ganho", "Valor Estimado Mensal (R$)"]
+                ];
+                state.incomes.forEach(i => { incomesHeader.push([i.name, parseFloat(i.value)]); });
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(incomesHeader), "Rendas & Ganhos");
+
+                // 4. Partilhas (Devedores)
                 const loansHeader = [
-                    ["PARTILHAS & CONTROLE DE DEVEDORES"],
+                    ["CONTROLE DE PARTILHAS (DEVEDORES)"],
                     [],
                     ["Nome do Devedor", "Mercado Pago (R$)", "PicPay (R$)", "Santander (R$)", "Nio (R$)", "Total Devedor (R$)"]
                 ];
-
                 state.loans.forEach(l => {
                     const totalDevedor = parseFloat(l.MP || 0) + parseFloat(l.PP || 0) + parseFloat(l.SAN || 0) + parseFloat(l.NIO || 0);
                     loansHeader.push([
-                        l.name,
-                        parseFloat(l.MP || 0),
-                        parseFloat(l.PP || 0),
-                        parseFloat(l.SAN || 0),
-                        parseFloat(l.NIO || 0),
-                        totalDevedor
+                        l.name, parseFloat(l.MP || 0), parseFloat(l.PP || 0), parseFloat(l.SAN || 0), parseFloat(l.NIO || 0), totalDevedor
                     ]);
                 });
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(loansHeader), "Partilhas");
 
-                if (state.loans.length > 0) {
-                    const totalMP = state.loans.reduce((sum, l) => sum + parseFloat(l.MP || 0), 0);
-                    const totalPP = state.loans.reduce((sum, l) => sum + parseFloat(l.PP || 0), 0);
-                    const totalSAN = state.loans.reduce((sum, l) => sum + parseFloat(l.SAN || 0), 0);
-                    const totalNIO = state.loans.reduce((sum, l) => sum + parseFloat(l.NIO || 0), 0);
-                    const totalGeral = totalMP + totalPP + totalSAN + totalNIO;
-                    
-                    loansHeader.push([]);
-                    loansHeader.push(["TOTAL DE PARCERIAS", totalMP, totalPP, totalSAN, totalNIO, totalGeral]);
-                }
-
-                const wsLoans = XLSX.utils.aoa_to_sheet(loansHeader);
-                XLSX.utils.book_append_sheet(wb, wsLoans, "Partilhas (Devedores)");
-
-                // 3. Criar dados para a terceira aba: "Livro Diário"
+                // 5. Livro Diário
                 const journalHeader = [
                     ["LIVRO DIÁRIO - REGISTRO DE TRANSAÇÕES"],
-                    ["Arquivo auditado cronologicamente"],
                     [],
-                    ["Data/Hora", "Tipo de Ação", "Descrição do Evento", "Valor Associado (R$)"]
+                    ["Data/Hora", "Ação", "Descrição do Evento", "Valor Associado (R$)"]
                 ];
+                state.history.forEach(h => { journalHeader.push([h.date, h.type.toUpperCase(), h.description, h.amount]); });
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(journalHeader), "Livro Diário");
 
-                state.history.forEach(h => {
-                    journalHeader.push([
-                        h.date,
-                        h.type.toUpperCase(),
-                        h.description,
-                        h.amount
-                    ]);
-                });
-
-                const wsJournal = XLSX.utils.aoa_to_sheet(journalHeader);
-                XLSX.utils.book_append_sheet(wb, wsJournal, "Livro Diário");
-
-                // Configuração da data no formato dd_mm_aaaa para o nome do arquivo
                 const d = new Date();
-                const day = String(d.getDate()).padStart(2, '0');
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                const year = d.getFullYear();
-                const formattedDate = `${day}_${month}_${year}`;
-
-                // Gerar e descarregar o arquivo .xlsx completo com a nova formatação de data
-                XLSX.writeFile(wb, `Gestor_Financas_Completo_${formattedDate}.xlsx`);
-                showToast("Arquivo Excel (3 abas) exportado com sucesso!");
+                const formattedDate = `${String(d.getDate()).padStart(2,'0')}_${String(d.getMonth()+1).padStart(2,'0')}_${d.getFullYear()}`;
+                XLSX.writeFile(wb, `Central_Financeira_${formattedDate}.xlsx`);
+                showToast("Excel exportado com sucesso!");
             } catch (err) {
-                console.error("Erro na exportação Excel:", err);
-                showToast("Erro ao gerar o arquivo Excel.");
+                console.error(err);
+                showToast("Erro ao exportar Excel.");
             }
-        }
+        };
 
-        // --- SISTEMA DE MODAL DE CRIAÇÃO / EDIÇÃO GERAL ---
+        // --- SISTEMA DE MODALS E REGISTROS ---
         window.openAddModal = function() { state.editingId = null; setModalType('cartao'); document.getElementById('modal').classList.add('open'); }
         window.closeAddModal = function() { document.getElementById('modal').classList.remove('open'); }
         window.handleOverlayClick = function(e) { if(e.target.id === 'modal') closeAddModal(); }
 
         window.setModalType = function(type) {
             state.modalType = type;
-            document.getElementById('m-tab-cartao').classList.toggle('active', type === 'cartao');
-            document.getElementById('m-tab-partilha').classList.toggle('active', type === 'partilha');
+            ['cartao', 'poupanca', 'receita', 'partilha', 'diario'].forEach(t => {
+                const el = document.getElementById(`m-tab-${t}`);
+                if (el) el.classList.toggle('active', t === type);
+            });
             
             const fields = document.getElementById('form-fields');
             if (type === 'cartao') {
                 fields.innerHTML = `
-                    <div class="form-group"><label class="form-label">Nome do Cartão/Despesa</label><input type="text" id="c-name" required class="form-control" placeholder="Ex: CARRO"></div>
+                    <div class="form-group"><label class="form-label">Nome do Cartão</label><input type="text" id="c-name" required class="form-control" placeholder="Ex: CARRO"></div>
                     <div class="form-grid-2">
                         <div class="form-group"><label class="form-label">Fatura Total (R$)</label><input type="number" step="0.01" id="c-bill" required class="form-control" placeholder="0.00"></div>
                         <div class="form-group"><label class="form-label">Vencimento (Dia 1-31)</label><input type="number" min="1" max="31" id="c-day" required class="form-control" placeholder="Ex: 10"></div>
                     </div>
-                    <div class="form-group" style="margin-top: 6px;">
-                        <label class="form-label">Valor Já Pago/Adiantado (R$)</label>
-                        <input type="number" step="0.01" id="c-prepaid" class="form-control" value="0" placeholder="Para adiantamentos em débito/pix">
+                    <div class="form-group">
+                        <label class="form-label">Já Pago/Adiantado (R$)</label>
+                        <input type="number" step="0.01" id="c-prepaid" class="form-control" value="0">
                     </div>`;
-            } else {
+            } else if (type === 'poupanca') {
+                fields.innerHTML = `
+                    <div class="form-group"><label class="form-label">Nome do Objetivo</label><input type="text" id="s-name" required class="form-control" placeholder="Ex: Viagem de Fim de Ano"></div>
+                    <div class="form-grid-2">
+                        <div class="form-group"><label class="form-label">Meta Final (R$)</label><input type="number" step="0.01" id="s-target" required class="form-control" placeholder="0.00"></div>
+                        <div class="form-group"><label class="form-label">Guardado (R$)</label><input type="number" step="0.01" id="s-saved" class="form-control" value="0"></div>
+                    </div>
+                    <div class="form-group"><label class="form-label">Data Limite</label><input type="date" id="s-date" required class="form-control"></div>`;
+            } else if (type === 'receita') {
+                fields.innerHTML = `
+                    <div class="form-group"><label class="form-label">Nome da Receita</label><input type="text" id="i-name" required class="form-control" placeholder="Ex: Salário Fixo"></div>
+                    <div class="form-group"><label class="form-label">Valor Mensal (R$)</label><input type="number" step="0.01" id="i-value" required class="form-control" placeholder="0.00"></div>`;
+            } else if (type === 'partilha') {
                 fields.innerHTML = `
                     <div class="form-group"><label class="form-label">Nome do Devedor</label><input type="text" id="l-name" required class="form-control" placeholder="Ex: ANGELA"></div>
                     <div class="form-grid-2">
@@ -1238,12 +1512,18 @@
                         <div class="form-group"><label class="form-label">Santander</label><input type="number" step="0.01" id="l-san" class="form-control" value="0"></div>
                         <div class="form-group"><label class="form-label">Nio</label><input type="number" step="0.01" id="l-nio" class="form-control" value="0"></div>
                     </div>`;
+            } else if (type === 'diario') {
+                fields.innerHTML = `
+                    <div class="form-group"><label class="form-label">Descrição do Gasto</label><input type="text" id="d-name" required class="form-control" placeholder="Ex: Uber ou Lanche"></div>
+                    <div class="form-group"><label class="form-label">Valor do Gasto (R$)</label><input type="number" step="0.01" id="d-amount" required class="form-control" placeholder="0.00"></div>`;
             }
         }
 
         window.saveRecord = function(e) {
             e.preventDefault();
-            if (state.modalType === 'cartao') {
+            const type = state.modalType;
+
+            if (type === 'cartao') {
                 const name = document.getElementById('c-name').value.toUpperCase();
                 const totalBill = parseFloat(document.getElementById('c-bill').value);
                 const dueDay = parseInt(document.getElementById('c-day').value);
@@ -1251,18 +1531,42 @@
                 
                 if(state.editingId) {
                     const idx = state.cards.findIndex(c => c.id === state.editingId);
-                    const oldCard = state.cards[idx];
                     state.cards[idx] = { id: state.editingId, name, totalBill, dueDay, prepaid };
-                    logToJournal('edicao', `Alteração do cartão ${name}. Fatura: ${formatBRL(totalBill)}, Adiantado: ${formatBRL(prepaid)}.`, totalBill - oldCard.totalBill);
+                    logToJournal('edicao', `Alteração do cartão ${name}. Fatura: ${formatBRL(totalBill)}.`, 0);
                 } else {
                     state.cards.push({ id: Date.now().toString(), name, totalBill, dueDay, prepaid });
-                    logToJournal('criacao', `Criação do cartão/despesa ${name} com vencimento no dia ${dueDay}.`, totalBill);
-                    if (prepaid > 0) {
-                        logToJournal('adiantamento', `Adiantamento registrado na criação do cartão ${name}.`, prepaid);
-                    }
+                    logToJournal('criacao', `Cartão ${name} cadastrado. Vencimento dia ${dueDay}.`, totalBill);
                 }
                 switchTab('cartoes');
-            } else {
+            } else if (type === 'poupanca') {
+                const name = document.getElementById('s-name').value.toUpperCase();
+                const target = parseFloat(document.getElementById('s-target').value);
+                const saved = parseFloat(document.getElementById('s-saved').value) || 0;
+                const limitDate = document.getElementById('s-date').value;
+
+                if (state.editingId) {
+                    const idx = state.savings.findIndex(s => s.id === state.editingId);
+                    state.savings[idx] = { id: state.editingId, name, target, saved, limitDate };
+                    logToJournal('edicao', `Objetivo ${name} alterado. Alvo: ${formatBRL(target)}.`, 0);
+                } else {
+                    state.savings.push({ id: Date.now().toString(), name, target, saved, limitDate });
+                    logToJournal('criacao', `Objetivo ${name} de poupança cadastrado para ${new Date(limitDate+'T00:00:00').toLocaleDateString('pt-BR')}.`, target);
+                }
+                switchTab('poupancas');
+            } else if (type === 'receita') {
+                const name = document.getElementById('i-name').value.toUpperCase();
+                const value = parseFloat(document.getElementById('i-value').value);
+
+                if (state.editingId) {
+                    const idx = state.incomes.findIndex(i => i.id === state.editingId);
+                    state.incomes[idx] = { id: state.editingId, name, value };
+                    logToJournal('edicao', `Ganho ${name} alterado para ${formatBRL(value)}.`, value);
+                } else {
+                    state.incomes.push({ id: Date.now().toString(), name, value });
+                    logToJournal('criacao', `Nova receita cadastrada: ${name} de ${formatBRL(value)}.`, value);
+                }
+                switchTab('receitas');
+            } else if (type === 'partilha') {
                 const name = document.getElementById('l-name').value.toUpperCase();
                 const MP = parseFloat(document.getElementById('l-mp').value) || 0;
                 const PP = parseFloat(document.getElementById('l-pp').value) || 0;
@@ -1273,18 +1577,28 @@
                 if(state.editingId) {
                     const idx = state.loans.findIndex(l => l.id === state.editingId);
                     state.loans[idx] = { id: state.editingId, name, MP, PP, SAN, NIO };
-                    logToJournal('edicao', `Atualização da partilha de ${name}. Total devedor: ${formatBRL(sum)}.`, sum);
+                    logToJournal('edicao', `Atualização da partilha de ${name}. Total devedor: ${formatBRL(sum)}.`, 0);
                 } else {
                     state.loans.push({ id: Date.now().toString(), name, MP, PP, SAN, NIO });
-                    logToJournal('criacao', `Nova partilha registrada para ${name}. Valor em dívida: ${formatBRL(sum)}.`, sum);
+                    logToJournal('criacao', `Nova partilha registrada para ${name}. Valor em dívida: ${formatBRL(sum)}.`, 0);
                 }
-                switchTab('partilhas');
+                switchTab('receitas');
+            } else if (type === 'diario') {
+                const name = document.getElementById('d-name').value.toUpperCase();
+                const amount = parseFloat(document.getElementById('d-amount').value);
+                const dateStr = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + ' - ' + new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+
+                state.dailyExpenses.unshift({ id: Date.now().toString(), name, amount, date: dateStr });
+                logToJournal('adiantamento', `Gasto diário registrado em caixa: ${name}.`, -amount);
+                switchTab('diarios');
             }
+
             saveState();
             closeAddModal();
             showToast('Salvo com sucesso!');
         }
 
+        // --- SISTEMAS DE EDIÇÃO ---
         window.editCard = function(id) {
             const c = state.cards.find(item => item.id === id);
             if (!c) return;
@@ -1298,10 +1612,59 @@
         window.deleteCard = function(id) {
             const c = state.cards.find(i => i.id === id);
             if (c && confirm(`Deseja remover o cartão ${c.name}?`)) {
-                logToJournal('remocao', `Remoção permanente do cartão ${c.name}.`, -c.totalBill);
+                logToJournal('remocao', `Remoção do cartão ${c.name}.`, -c.totalBill);
                 state.cards = state.cards.filter(i => i.id !== id);
-                saveState();
-                renderActiveTab();
+                saveState(); renderActiveTab();
+            }
+        }
+
+        window.editSavings = function(id) {
+            const s = state.savings.find(item => item.id === id);
+            if (!s) return;
+            openAddModal(); state.editingId = id; setModalType('poupanca');
+            document.getElementById('s-name').value = s.name;
+            document.getElementById('s-target').value = s.target;
+            document.getElementById('s-saved').value = s.saved || 0;
+            document.getElementById('s-date').value = s.limitDate;
+        }
+
+        window.deleteSavings = function(id) {
+            const s = state.savings.find(i => i.id === id);
+            if (s && confirm(`Remover o objetivo ${s.name}?`)) {
+                logToJournal('remocao', `Objetivo de poupança removido: ${s.name}.`, -s.target);
+                state.savings = state.savings.filter(i => i.id !== id);
+                saveState(); renderActiveTab();
+            }
+        }
+
+        window.quickAddSavings = function(id) {
+            const amountStr = prompt("Quanto deseja poupar e adicionar agora?");
+            const amount = parseFloat(amountStr) || 0;
+            if (amount <= 0) return;
+
+            const idx = state.savings.findIndex(s => s.id === id);
+            if (idx !== -1) {
+                state.savings[idx].saved = (parseFloat(state.savings[idx].saved) || 0) + amount;
+                logToJournal('adiantamento', `Depósito de poupança adicionado ao objetivo ${state.savings[idx].name}.`, amount);
+                saveState(); renderActiveTab();
+                showToast("Poupança adicionada com sucesso!");
+            }
+        }
+
+        window.editIncome = function(id) {
+            const i = state.incomes.find(item => item.id === id);
+            if (!i) return;
+            openAddModal(); state.editingId = id; setModalType('receita');
+            document.getElementById('i-name').value = i.name;
+            document.getElementById('i-value').value = i.value;
+        }
+
+        window.deleteIncome = function(id) {
+            const i = state.incomes.find(item => item.id === id);
+            if (i && confirm(`Remover receita de ${i.name}?`)) {
+                logToJournal('remocao', `Receita removida: ${i.name}.`, -i.value);
+                state.incomes = state.incomes.filter(item => item.id !== id);
+                saveState(); renderActiveTab();
             }
         }
 
@@ -1322,8 +1685,16 @@
                 const total = parseFloat(loanObj.MP || 0) + parseFloat(loanObj.PP || 0) + parseFloat(loanObj.SAN || 0) + parseFloat(loanObj.NIO || 0);
                 logToJournal('remocao', `Remoção do registro de devedor: ${loanObj.name}.`, -total);
                 state.loans = state.loans.filter(i => i.id !== id);
-                saveState();
-                renderActiveTab();
+                saveState(); renderActiveTab();
+            }
+        }
+
+        window.deleteDailyExpense = function(id) {
+            const e = state.dailyExpenses.find(item => item.id === id);
+            if (e && confirm(`Remover gasto diário de ${e.name}?`)) {
+                logToJournal('remocao', `Gasto diário removido: ${e.name}.`, e.amount);
+                state.dailyExpenses = state.dailyExpenses.filter(item => item.id !== id);
+                saveState(); renderActiveTab();
             }
         }
 
@@ -1337,13 +1708,8 @@
             document.getElementById('pay-modal').classList.add('open');
         }
 
-        window.closePayModal = function() {
-            document.getElementById('pay-modal').classList.remove('open');
-        }
-
-        window.handlePayOverlayClick = function(e) {
-            if (e.target.id === 'pay-modal') closePayModal();
-        }
+        window.closePayModal = function() { document.getElementById('pay-modal').classList.remove('open'); }
+        window.handlePayOverlayClick = function(e) { if (e.target.id === 'pay-modal') closePayModal(); }
 
         window.submitPayment = function(e) {
             e.preventDefault();
@@ -1354,10 +1720,7 @@
             if (idx !== -1) {
                 const currentPrepaid = parseFloat(state.cards[idx].prepaid || 0);
                 state.cards[idx].prepaid = currentPrepaid + amount;
-                
-                // Grava a transação no diário
                 logToJournal('adiantamento', `Adiantamento via Débito/Pix efetuado no cartão ${state.cards[idx].name}.`, amount);
-                
                 saveState();
                 closePayModal();
                 showToast(`Pago ${formatBRL(amount)} no débito!`);

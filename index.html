@@ -862,7 +862,7 @@
             return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         }
 
-        // --- MOTOR FINANCEIRO ---
+        // --- MOTOR FINANCEIRO COM AUTO-ROLLOVER QUANDO RESTA <= 7 DIAS ---
         function calculateWeeklyMetas() {
             const [todayYear, todayMonth, todayDay] = simulatedTodayStr.split('-').map(Number);
             const today = new Date(todayYear, todayMonth - 1, todayDay);
@@ -878,12 +878,17 @@
                 const dueDay = parseInt(card.dueDay);
                 let computedDueDate = new Date(currentYear, currentMonth, dueDay);
 
-                if (computedDueDate < today) {
-                    computedDueDate = new Date(currentYear, currentMonth + 1, dueDay);
-                }
+                // Lógica de cálculo do tempo restante inicial
+                let diffTime = computedDueDate.getTime() - today.getTime();
+                let daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                const diffTime = computedDueDate.getTime() - today.getTime();
-                const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                // [AUTO-ROLLOVER] Se faltar 1 semana ou menos (ou se já venceu),
+                // pula automaticamente o ciclo de economia para o vencimento do MÊS SEGUINTE!
+                if (daysRemaining <= 7) {
+                    computedDueDate = new Date(currentYear, currentMonth + 1, dueDay);
+                    diffTime = computedDueDate.getTime() - today.getTime();
+                    daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                }
 
                 // Busca as partilhas e soma APENAS a fração específica deste cartão normalizado
                 const loansForCard = state.loans.filter(l => normalizeString(l.name) === normalizeString(card.name));
@@ -1439,18 +1444,16 @@
             renderFormFields();
         }
 
-        // FUNÇÃO DE ATUALIZAÇÃO EXATA DOS CAMPOS DINÂMICOS NA SELEÇÃO DO DROP DOWN
         window.handleCardSelectChange = function() {
             const selectEl = document.getElementById('f-loan-cardname');
+            if (!selectEl) return;
             const selectedCard = selectEl.value;
             
-            // Oculta todos os grupos de frações inicialmente
             document.getElementById('group-santander').style.display = 'none';
             document.getElementById('group-nio').style.display = 'none';
             document.getElementById('group-mp').style.display = 'none';
             document.getElementById('group-pp').style.display = 'none';
             
-            // Ativa estritamente o campo que combina com o nome do cartão selecionado
             const normalized = normalizeString(selectedCard);
             if (normalized.includes('santander')) {
                 document.getElementById('group-santander').style.display = 'block';
@@ -1528,7 +1531,6 @@
                     </div>
                 `;
 
-                // Se houver dados de edição prévios, dispara o evento de exibição do respectivo banco
                 if (editData && editData.name) {
                     setTimeout(() => {
                         handleCardSelectChange();

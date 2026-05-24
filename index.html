@@ -817,25 +817,31 @@
         }
 
         // --- SISTEMA CORRIGIDO DE CÁLCULO ESTREITO DE COPARTICIPAÇÃO ---
-        // Agora o total de coparticipações de um registro considera APENAS o valor correspondente ao nome do cartão.
-        // Se o cartão é "Mercado pago", só leremos a fração "MercadoPago", e assim sucessivamente.
+        function normalizeString(str) {
+            if (!str) return '';
+            return str.trim()
+                      .toLowerCase()
+                      .normalize("NFD")
+                      .replace(/[\u0300-\u036f]/g, "") // Remove acentos
+                      .replace(/\s+/g, '');            // Remove espaços
+        }
+
         function getSpecificCardLoanValue(loan, cardName) {
             if (!loan || !cardName) return 0;
-            const normalizedCardName = cardName.trim().toLowerCase();
+            const normCard = normalizeString(cardName);
             
-            if (normalizedCardName.includes('santander')) {
+            if (normCard.includes('santander')) {
                 return parseFloat(loan.Santander || 0);
-            } else if (normalizedCardName.includes('nio') || normalizedCardName.includes('nubank')) {
+            } else if (normCard.includes('nio') || normCard.includes('nubank')) {
                 return parseFloat(loan.Nio || 0);
-            } else if (normalizedCardName.includes('mercado pago') || normalizedCardName.includes('mercadopago')) {
+            } else if (normCard.includes('mercado') || normCard.includes('pago')) {
                 return parseFloat(loan.MercadoPago || 0);
-            } else if (normalizedCardName.includes('picpay') || normalizedCardName.includes('pic pay')) {
+            } else if (normCard.includes('picpay') || normCard.includes('pic')) {
                 return parseFloat(loan.PicPay || 0);
             }
             return 0;
         }
 
-        // Função de somatório de todos os bancos de uma partilha (usado apenas na visualização da aba Partilhas)
         function getLoanTotal(l) {
             if (!l) return 0;
             return parseFloat(l.Santander || 0) + 
@@ -879,8 +885,8 @@
                 const diffTime = computedDueDate.getTime() - today.getTime();
                 const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                // Busca as partilhas e soma APENAS a fração que pertence a esse cartão de forma perfeita
-                const loansForCard = state.loans.filter(l => l.name.trim().toLowerCase() === card.name.trim().toLowerCase());
+                // Busca as partilhas e soma APENAS a fração específica deste cartão normalizado
+                const loansForCard = state.loans.filter(l => normalizeString(l.name) === normalizeString(card.name));
                 let loansTotal = 0;
                 loansForCard.forEach(l => {
                     loansTotal += getSpecificCardLoanValue(l, card.name);
@@ -889,9 +895,11 @@
                 const totalBill = parseFloat(card.totalBill || 0);
                 const prepaidAmount = parseFloat(card.prepaid || 0);
                 
-                // CÁLCULO PERFEITO: Fatura total - Empréstimos vinculados a este cartão - Adiantamentos
+                // CÁLCULO DO SALDO DEVEDOR REAL DO USUÁRIO
                 const myShare = Math.max(0, totalBill - loansTotal - prepaidAmount);
                 const weeksRemaining = Math.max(1, daysRemaining / 7);
+                
+                // ESFORÇO SEMANAL BASEADO NA PARTE LÍQUIDA REAL DO USUÁRIO
                 const weeklyEffort = myShare / weeksRemaining;
 
                 totalBaseBill += totalBill;
@@ -1033,7 +1041,7 @@
                                     <h4 class="item-title">${c.name}</h4>
                                     <span class="item-subtitle">Vencimento: Dia ${c.dueDay} (${displayDays})</span>
                                 </div>
-                                <span class="status-pill ${color}">Meta Semanal: ${formatBRL(c.weeklyEffort)}</span>
+                                <span class="status-pill ${color}">Meta Semanal: ${formatBRL(c.weeklyEffort * (1 + state.safetyMargin))}</span>
                             </div>
                             
                             <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: -4px;">
@@ -1271,7 +1279,7 @@
             state.salaryDay = salaryD;
 
             saveState();
-            logToJournal('salario', `Configuração de salário atualizada. Valor: ${formatBRL(salaryVal)}, Dia: ${salaryD}.`, salaryVal);
+            logToJournal('salario', `Configuração de salário updated. Valor: ${formatBRL(salaryVal)}, Dia: ${salaryD}.`, salaryVal);
             showToast('Configurações de Salário salvas!');
             switchTab('dashboard');
         }
@@ -1351,7 +1359,7 @@
                         c.loansTotal,
                         c.prepaidAmount,
                         c.myShare,
-                        c.weeklyEffort,
+                        c.weeklyEffort * (1 + state.safetyMargin),
                         c.daysRemaining
                     ]);
                 });
@@ -1431,6 +1439,30 @@
             renderFormFields();
         }
 
+        // FUNÇÃO DE ATUALIZAÇÃO EXATA DOS CAMPOS DINÂMICOS NA SELEÇÃO DO DROP DOWN
+        window.handleCardSelectChange = function() {
+            const selectEl = document.getElementById('f-loan-cardname');
+            const selectedCard = selectEl.value;
+            
+            // Oculta todos os grupos de frações inicialmente
+            document.getElementById('group-santander').style.display = 'none';
+            document.getElementById('group-nio').style.display = 'none';
+            document.getElementById('group-mp').style.display = 'none';
+            document.getElementById('group-pp').style.display = 'none';
+            
+            // Ativa estritamente o campo que combina com o nome do cartão selecionado
+            const normalized = normalizeString(selectedCard);
+            if (normalized.includes('santander')) {
+                document.getElementById('group-santander').style.display = 'block';
+            } else if (normalized.includes('nio') || normalized.includes('nubank')) {
+                document.getElementById('group-nio').style.display = 'block';
+            } else if (normalized.includes('mercado') || normalized.includes('pago')) {
+                document.getElementById('group-mp').style.display = 'block';
+            } else if (normalized.includes('picpay') || normalized.includes('pic')) {
+                document.getElementById('group-pp').style.display = 'block';
+            }
+        }
+
         function renderFormFields(editData = null) {
             const fieldsContainer = document.getElementById('form-fields');
             
@@ -1459,7 +1491,7 @@
                     selectOptions = `<option value="" disabled>Cadastre uma Fatura Primeiro!</option>`;
                 } else {
                     state.cards.forEach(c => {
-                        const isSelected = editData && editData.name.trim().toLowerCase() === c.name.trim().toLowerCase() ? 'selected' : '';
+                        const isSelected = editData && normalizeString(editData.name) === normalizeString(c.name) ? 'selected' : '';
                         selectOptions += `<option value="${c.name}" ${isSelected}>${c.name}</option>`;
                     });
                 }
@@ -1467,34 +1499,41 @@
                 fieldsContainer.innerHTML = `
                     <div class="form-group">
                         <label class="form-label">Nome da Pessoa (Quem te deve)</label>
-                        <input type="text" required id="f-loan-debtor" class="form-input" placeholder="Ex: Romilda" value="${editData ? (editData.debtorName || '') : ''}">
+                        <input type="text" required id="f-loan-debtor" class="form-input" placeholder="Ex: Ângela" value="${editData ? (editData.debtorName || '') : ''}">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Cartão Principal Associado</label>
-                        <select required id="f-loan-cardname" class="form-input" style="background-color: #0b0f19;">
+                        <select required id="f-loan-cardname" onchange="handleCardSelectChange()" class="form-input" style="background-color: #0b0f19;">
                             ${selectOptions}
                         </select>
                     </div>
                     <div class="form-group" style="border-top: 1px dashed var(--border-color); padding-top: 12px; margin-top: 12px;">
-                        <span class="form-label" style="font-weight: 800; color: white;">VALORES INDIVIDUAIS POR BANCO:</span>
+                        <span class="form-label" style="font-weight: 800; color: white;">VALOR DA COPARTICIPAÇÃO:</span>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" id="group-santander" style="display: none;">
                         <label class="form-label">Fração Santander (R$)</label>
                         <input type="number" step="0.01" min="0" id="f-loan-santander" class="form-input" value="${editData ? editData.Santander : '0'}">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" id="group-nio" style="display: none;">
                         <label class="form-label">Fração Nio (R$)</label>
                         <input type="number" step="0.01" min="0" id="f-loan-nio" class="form-input" value="${editData ? editData.Nio : '0'}">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" id="group-mp" style="display: none;">
                         <label class="form-label">Fração Mercado Pago (R$)</label>
                         <input type="number" step="0.01" min="0" id="f-loan-mp" class="form-input" value="${editData ? editData.MercadoPago : '0'}">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" id="group-pp" style="display: none;">
                         <label class="form-label">Fração PicPay (R$)</label>
                         <input type="number" step="0.01" min="0" id="f-loan-pp" class="form-input" value="${editData ? editData.PicPay : '0'}">
                     </div>
                 `;
+
+                // Se houver dados de edição prévios, dispara o evento de exibição do respectivo banco
+                if (editData && editData.name) {
+                    setTimeout(() => {
+                        handleCardSelectChange();
+                    }, 50);
+                }
             }
         }
 
@@ -1522,10 +1561,10 @@
                 const debtorName = document.getElementById('f-loan-debtor').value.trim();
                 const cardName = document.getElementById('f-loan-cardname').value;
                 
-                const Santander = parseFloat(document.getElementById('f-loan-santander').value) || 0;
-                const Nio = parseFloat(document.getElementById('f-loan-nio').value) || 0;
-                const MercadoPago = parseFloat(document.getElementById('f-loan-mp').value) || 0;
-                const PicPay = parseFloat(document.getElementById('f-loan-pp').value) || 0;
+                const Santander = parseFloat(document.getElementById('f-loan-santander')?.value || 0);
+                const Nio = parseFloat(document.getElementById('f-loan-nio')?.value || 0);
+                const MercadoPago = parseFloat(document.getElementById('f-loan-mp')?.value || 0);
+                const PicPay = parseFloat(document.getElementById('f-loan-pp')?.value || 0);
                 const sum = Santander + Nio + MercadoPago + PicPay;
 
                 if (state.modalMode === 'edit') {

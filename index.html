@@ -1,1208 +1,325 @@
+
 <!DOCTYPE html>
 <html lang="pt-PT">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Meta Semanal - Finanças Privadas</title>
+    <!-- Biblioteca SheetJS para geração de arquivos Excel nativos diretamente no navegador -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.mini.min.js"></script>
     <style>
         /* --- ESTILOS NATIVOS CSS DE ALTO DESEMPENHO (Premium Dark Theme) --- */
-        :root {
-            --bg-main: #020617;
-            --bg-card: #0f172a;
-            --bg-input: #020617;
-            --border-color: rgba(51, 65, 85, 0.6);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --primary: #10b981;
-            --primary-dark: #059669;
-            --primary-light: rgba(16, 185, 129, 0.1);
-            --secondary: #14b8a6;
-            --accent-rose: #f43f5e;
-            --accent-amber: #f59e0b;
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.5);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        html, body {
-            height: 100%;
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            overflow: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        body {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        /* --- CABEÇALHO --- */
-        header {
-            background-color: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border-color);
-            padding: 16px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-            z-index: 40;
-        }
-
-        .header-brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .header-logo {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #020617;
-            font-weight: 800;
-            font-size: 20px;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
-        }
-
-        .header-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: #ffffff;
-            line-height: 1.2;
-        }
-
-        .header-subtitle {
-            font-size: 10px;
-            color: var(--text-muted);
-            margin-top: 2px;
-        }
-
-        .header-badge {
-            font-size: 10px;
-            background-color: var(--primary-light);
-            color: var(--primary);
-            font-weight: 700;
-            padding: 4px 12px;
-            border-radius: 9999px;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-
-        /* --- BANNER DE ESTADO LOCAL --- */
-        .sync-banner {
-            background-color: rgba(15, 23, 42, 0.8);
-            border-bottom: 1px solid var(--border-color);
-            color: #cbd5e1;
-            font-size: 10px;
-            font-weight: 600;
-            padding: 10px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            min-height: 40px;
-            flex-shrink: 0;
-        }
-
-        .sync-banner-text {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 6px;
-            line-height: 1.4;
-            flex: 1;
-        }
-
-        .sync-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: var(--primary);
-            box-shadow: 0 0 8px var(--primary);
-            display: inline-block;
-            flex-shrink: 0;
-        }
-
-        /* Botão de Exportação */
-        .btn-export {
-            background-color: rgba(16, 185, 129, 0.15);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            color: var(--primary);
-            font-size: 9px;
-            font-weight: 700;
-            padding: 6px 10px;
-            border-radius: 6px;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            flex-shrink: 0;
-        }
-
-        .btn-export:hover {
-            background-color: var(--primary);
-            color: #020617;
-        }
-
-        /* --- CONTEÚDO PRINCIPAL --- */
-        main {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            padding-bottom: 112px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        main::-webkit-scrollbar {
-            display: none;
-        }
-
-        /* --- CARDS E MÉTRICAS --- */
-        .meta-card {
-            background: linear-gradient(135deg, var(--bg-card), #061510);
-            border: 1px solid var(--border-color);
-            padding: 24px;
-            border-radius: 24px;
-            text-align: center;
-            box-shadow: var(--shadow-lg);
-        }
-
-        .meta-card-label {
-            font-size: 10px;
-            color: var(--text-muted);
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            display: block;
-        }
-
-        .meta-card-value {
-            font-size: 36px;
-            font-weight: 800;
-            color: var(--primary);
-            margin-top: 8px;
-        }
-
-        .meta-card-desc {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 8px;
-        }
-
-        .summary-grid {
-            display: grid;
-            grid-template-cols: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .summary-card {
-            background-color: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--border-color);
-            padding: 16px;
-            border-radius: 16px;
-        }
-
-        .summary-label {
-            font-size: 9px;
-            color: var(--text-muted);
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .summary-value {
-            font-size: 18px;
-            font-weight: 700;
-            color: #f1f5f9;
-            margin-top: 4px;
-            display: block;
-        }
-
-        .section-title {
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            margin-bottom: 4px;
-        }
-
-        .list-container {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .item-card {
-            background-color: var(--bg-card);
-            border: 1px solid rgba(51, 65, 85, 0.8);
-            border-radius: 16px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            overflow: hidden;
-        }
-
-        .item-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 8px;
-        }
-
-        .item-title-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-        }
-        .status-dot.green { background-color: var(--primary); }
-        .status-dot.amber { background-color: var(--accent-amber); }
-        .status-dot.rose { background-color: var(--accent-rose); }
-
-        .item-title {
-            font-size: 14px;
-            font-weight: 800;
-            color: #ffffff;
-            word-break: break-all;
-        }
-
-        .item-subtitle {
-            font-size: 10px;
-            color: var(--text-muted);
-        }
-
-        .item-value-side {
-            text-align: right;
-            flex-shrink: 0;
-        }
-
-        .item-value-label {
-            font-size: 9px;
-            color: var(--text-muted);
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .item-value-main {
-            font-size: 14px;
-            font-weight: 700;
-            color: #e2e8f0;
-        }
-
-        .info-grid {
-            background-color: #020617;
-            padding: 12px;
-            border-radius: 12px;
-            display: grid;
-            grid-template-cols: 1fr 1fr;
-            gap: 8px;
-            font-size: 12px;
-        }
-
-        .info-grid-3 {
-            background-color: #020617;
-            padding: 12px;
-            border-radius: 12px;
-            display: grid;
-            grid-template-cols: 1fr 1fr 1fr;
-            gap: 8px;
-            font-size: 12px;
-            text-align: center;
-        }
-
-        .info-cell {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .info-grid-label {
-            font-size: 9px;
-            color: var(--text-muted);
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .info-grid-value {
-            font-weight: 700;
-            color: #cbd5e1;
-            font-size: 11px;
-            word-break: break-all;
-        }
-        .info-grid-value.teal { color: var(--secondary); }
-        .info-grid-value.emerald { color: var(--primary); }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 4px;
-        }
-
+@@ -367,7 +366,7 @@
         .info-row span:first-child { color: var(--text-muted); }
         .info-row span:last-child { font-weight: 700; color: #cbd5e1; }
 
-        /* --- CARD ACTIONS --- */
+        /* --- CORREÇÃO DE SOBREPOSIÇÃO E BOTÕES (CARD ACTIONS) --- */
+        /* --- CONTROLES DE AÇÕES DOS CARTÕES --- */
         .card-actions {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(51, 65, 85, 0.4);
-            font-size: 12px;
-        }
-
-        @media (min-width: 480px) {
-            .card-actions {
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
-            }
-        }
-
-        .meta-base-text {
-            color: var(--text-muted);
-            line-height: 1.4;
-        }
-
-        .meta-base-value {
-            color: var(--primary);
-            font-weight: 800;
-        }
-
-        .action-button-group {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            width: 100%;
-        }
-
-        @media (min-width: 480px) {
-            .action-button-group {
-                width: auto;
-                justify-content: flex-end;
-            }
-        }
-
-        .btn-action {
-            flex: 1;
-            min-width: 65px;
-            padding: 8px 6px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: 700;
-            cursor: pointer;
-            border: none;
-            text-align: center;
-            white-space: normal;
-            word-break: break-word;
-            line-height: 1.2;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 32px;
-        }
-
-        .btn-action.pay {
-            flex: 1.4 1 auto;
-        }
-
-        @media (min-width: 480px) {
-            .btn-action {
-                flex: none;
-                min-width: 80px;
-                padding: 8px 12px;
-            }
-            .btn-action.pay {
-                flex: none;
-                min-width: 120px;
-            }
-        }
-
-        .btn-action.edit { background-color: rgba(51, 65, 85, 0.8); color: #cbd5e1; }
-        .btn-action.delete { background-color: rgba(244, 63, 94, 0.1); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.2); }
-        .btn-action.pay { background-color: rgba(20, 184, 166, 0.15); color: var(--secondary); border: 1px solid rgba(20, 184, 166, 0.3); }
-
-        /* --- ELEMENTOS DO LIVRO DIÁRIO --- */
-        .journal-badge {
-            font-size: 9px;
-            font-weight: 800;
-            padding: 2px 6px;
-            border-radius: 4px;
-            text-transform: uppercase;
-            display: inline-block;
-        }
-        .journal-badge.criacao { background-color: rgba(16, 185, 129, 0.15); color: var(--primary); }
-        .journal-badge.edicao { background-color: rgba(245, 158, 11, 0.15); color: var(--accent-amber); }
-        .journal-badge.remocao { background-color: rgba(244, 63, 94, 0.15); color: var(--accent-rose); }
-        .journal-badge.adiantamento { background-color: rgba(20, 184, 166, 0.15); color: var(--secondary); }
-
-        /* --- CONTROLES DE MARGEM INTERATIVOS --- */
-        .margin-controller-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background-color: rgba(15, 23, 42, 0.4);
-            border: 1px dashed var(--border-color);
-            padding: 12px 16px;
-            border-radius: 16px;
-            gap: 12px;
-        }
-
-        .margin-controller-label {
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--text-muted);
-            text-transform: uppercase;
-        }
-
-        .margin-controls-group {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .btn-margin-adjust {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            color: #ffffff;
-            width: 28px;
-            height: 28px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            cursor: pointer;
-            user-select: none;
-            transition: all 0.1s ease;
-        }
-
-        .btn-margin-adjust:active {
-            background-color: var(--primary-light);
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .margin-display-value {
-            font-size: 13px;
-            font-weight: 800;
-            color: var(--secondary);
-            min-width: 45px;
-            text-align: center;
-        }
-
-        /* --- NAVEGAÇÃO INFERIOR --- */
-        nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background-color: rgba(15, 23, 42, 0.9);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-top: 1px solid var(--border-color);
-            padding: 8px 8px 12px 8px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 40;
-            gap: 2px;
-        }
-
-        .nav-btn {
-            background: none;
-            border: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: var(--text-muted);
-            cursor: pointer;
-            width: 58px;
-        }
-
-        .nav-btn.active { color: var(--primary); }
-        .nav-btn span { font-size: 9px; font-weight: 700; margin-top: 4px; }
-        .nav-btn-icon { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.5; }
-
-        .nav-add-btn {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border: none;
-            border-radius: 14px;
-            color: #020617;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transform: translateY(-12px);
-            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
-            flex-shrink: 0;
-        }
-
-        /* --- MODAL --- */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background-color: rgba(2, 6, 23, 0.85);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            padding: 16px;
-            z-index: 50;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-
-        .modal-overlay.open { opacity: 1; pointer-events: auto; }
-        .modal-container {
-            background-color: var(--bg-card);
-            width: 100%;
-            max-width: 448px;
-            border-radius: 24px 24px 0 0;
-            padding: 24px;
-            border: 1px solid var(--border-color);
-            transform: translateY(100%);
-            transition: transform 0.3s ease;
-        }
-        .modal-overlay.open .modal-container { transform: translateY(0); }
-
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 16px; }
-        .modal-title { font-size: 16px; font-weight: 700; color: #ffffff; }
-        .modal-close { background: none; border: none; color: var(--text-muted); cursor: pointer; }
-
-        .modal-tabs { display: flex; background-color: var(--bg-main); padding: 4px; border-radius: 12px; margin-bottom: 16px; gap: 4px; }
-        .modal-tab-btn { flex: 1; background: none; border: none; color: var(--text-muted); font-size: 12px; font-weight: 700; padding: 8px; border-radius: 8px; cursor: pointer; }
-        .modal-tab-btn.active { background-color: var(--primary); color: #020617; }
-
-        /* Formulários */
-        .form-group { margin-bottom: 14px; }
-        .form-grid-2 { display: grid; grid-template-cols: 1fr 1fr; gap: 12px; }
-        .form-label { display: block; font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
-        .form-control { width: 100%; background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; color: #ffffff; font-size: 14px; outline: none; }
-
-        .btn-submit {
-            width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border: none; border-radius: 12px; color: #020617; font-size: 13px; font-weight: 800; text-transform: uppercase; cursor: pointer; margin-top: 12px;
-        }
-
-        .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background-color: #0f172a; color: var(--primary); font-size: 12px; font-weight: 700; padding: 12px 20px; border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.2); z-index: 100; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
-        .toast.show { opacity: 1; }
-    </style>
-</head>
-<body>
-
-    <header>
-        <div class="header-brand">
+@@ -629,13 +628,12 @@
             <div class="header-logo">$</div>
             <div>
                 <h1 class="header-title">Meta Semanal</h1>
                 <p class="header-subtitle">Planeamento Exato por Data</p>
+                <p class="header-subtitle">Planejamento Exato por Data</p>
             </div>
         </div>
         <div class="header-badge" id="current-badge-date">Mês Corrente</div>
     </header>
 
+    <!-- Indicador de Segurança Local com Botão Exportar Excel -->
     <div id="sync-status-banner" class="sync-banner">
         <div class="sync-banner-text">
             <span class="sync-dot"></span>
-            <span>Armazenamento Local Seguro (Privado &amp; Offline)</span>
-        </div>
-        <button class="btn-export" onclick="exportDataToExcel()">
-            <svg style="width:11px; height:11px; fill:currentColor" viewBox="0 0 24 24">
-                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
-            </svg>
-            Excel
-        </button>
+@@ -650,8 +648,7 @@
     </div>
 
     <main id="main-content">
+        <!-- Injetado Dinamicamente -->
+    </main>
         </main>
 
     <nav>
         <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn active">
-            <svg class="nav-btn-icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
-            <span>Painel</span>
-        </button>
-        <button onclick="switchTab('cartoes')" id="nav-cartoes" class="nav-btn">
-            <svg class="nav-btn-icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
-            <span>Cartões</span>
-        </button>
-        <button onclick="switchTab('partilhas')" id="nav-partilhas" class="nav-btn">
-            <svg class="nav-btn-icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-            <span>Partilhas</span>
-        </button>
-        <button onclick="switchTab('diario')" id="nav-diario" class="nav-btn">
-            <svg class="nav-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-            <span>Diário</span>
-        </button>
-        <button onclick="openAddModal()" class="nav-add-btn">
-            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+@@ -675,11 +672,10 @@
         </button>
     </nav>
 
+    <!-- MODAL -->
     <div id="modal" class="modal-overlay" onclick="handleOverlayClick(event)">
         <div class="modal-container">
             <div class="modal-header">
                 <h3 class="modal-title" id="modal-title">Novo Registo</h3>
+                <h3 class="modal-title" id="modal-title">Novo Registro</h3>
                 <button onclick="closeAddModal()" class="modal-close">
                     <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
-            </div>
-            <div class="modal-tabs">
-                <button type="button" onclick="setModalType('cartao')" id="m-tab-cartao" class="modal-tab-btn active">Cartão/Despesa</button>
-                <button type="button" onclick="setModalType('partilha')" id="m-tab-partilha" class="modal-tab-btn">Partilha</button>
+@@ -690,16 +686,15 @@
             </div>
             <form id="modal-form" onsubmit="saveRecord(event)">
                 <div id="form-fields"></div>
                 <button type="submit" class="btn-submit">Confirmar Guardar</button>
+                <button type="submit" class="btn-submit">Confirmar Salvar</button>
             </form>
         </div>
     </div>
 
+    <!-- MODAL DE ADIANTAMENTO RÁPIDO (DÉBITO) -->
     <div id="pay-modal" class="modal-overlay" onclick="handlePayOverlayClick(event)">
         <div class="modal-container" style="border-radius: 24px; padding: 24px;">
             <div class="modal-header">
                 <h3 class="modal-title">Registar Adiantamento (Débito/Pix)</h3>
+                <h3 class="modal-title">Registrar Adiantamento (Débito/Pix)</h3>
                 <button onclick="closePayModal()" class="modal-close">
                     <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
-            </div>
-            <form id="pay-form" onsubmit="submitPayment(event)">
-                <input type="hidden" id="pay-card-id">
-                <div class="form-group">
-                    <label class="form-label" id="pay-card-label">Cartão: -</label>
-                    <input type="number" step="0.01" id="pay-amount" required class="form-control" placeholder="Valor a adiantar (R$)">
-                </div>
-                <button type="submit" class="btn-submit" style="background: linear-gradient(135deg, var(--secondary), var(--primary));">Confirmar Pagamento</button>
-            </form>
-        </div>
-    </div>
+@@ -717,13 +712,12 @@
 
     <div id="toast" class="toast"><span id="toast-msg">Salvo!</span></div>
 
+    <!-- SCRIPT FINANÇAS LOCAIS -->
     <script>
         // 🛡️ DADOS INICIAIS VAZIOS (Para privacidade por omissão no seu GitHub público)
         const initialCards = [];
         const initialLoans = [];
         const initialHistory = [
             { id: 'sys-init', date: new Date().toLocaleString('pt-PT'), type: 'criacao', description: 'Sistema de Livro Diário inicializado com sucesso.', amount: 0 }
+            { id: 'sys-init', date: new Date().toLocaleString('pt-BR'), type: 'criacao', description: 'Sistema de Livro Diário inicializado com sucesso.', amount: 0 }
         ];
 
         // Estado carregado diretamente do armazenamento local (localStorage)
-        let state = {
-            cards: JSON.parse(localStorage.getItem('w_cards_exact_v2')) || initialCards,
-            loans: JSON.parse(localStorage.getItem('w_loans_exact_v2')) || initialLoans,
-            history: JSON.parse(localStorage.getItem('w_history_exact_v2')) || initialHistory,
-            currentTab: 'dashboard',
-            modalType: 'cartao',
-            editingId: null,
-            safetyMargin: parseFloat(localStorage.getItem('w_safety_margin_v2')) !== null && !isNaN(parseFloat(localStorage.getItem('w_safety_margin_v2'))) ? parseFloat(localStorage.getItem('w_safety_margin_v2')) : 0.25
-        };
+@@ -757,7 +751,7 @@
 
-        function getRealTodayString() {
-            const todayReal = new Date();
-            const yearReal = todayReal.getFullYear();
-            const monthReal = String(todayReal.getMonth() + 1).padStart(2, '0');
-            const dayReal = String(todayReal.getDate()).padStart(2, '0');
-            return `${yearReal}-${monthReal}-${dayReal}`;
-        }
-
-        let simulatedTodayStr = localStorage.getItem('simulated_today') || getRealTodayString();
-
-        function saveState() {
-            localStorage.setItem('w_cards_exact_v2', JSON.stringify(state.cards));
-            localStorage.setItem('w_loans_exact_v2', JSON.stringify(state.loans));
-            localStorage.setItem('w_history_exact_v2', JSON.stringify(state.history));
-            localStorage.setItem('w_safety_margin_v2', state.safetyMargin.toString());
-            localStorage.setItem('simulated_today', simulatedTodayStr);
-        }
-
+        // Função para acrescentar entradas no Livro Diário de forma cronológica
         function logToJournal(type, description, amount) {
             const timestamp = new Date().toLocaleString('pt-PT');
+            const timestamp = new Date().toLocaleString('pt-BR');
             state.history.unshift({
                 id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
                 date: timestamp,
-                type: type,
-                description: description,
-                amount: parseFloat(amount)
-            });
-            saveState();
-        }
+@@ -923,14 +917,12 @@
+            const marginPercent = Math.round(state.safetyMargin * 100);
 
-        function formatBRL(val) {
-            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
-        }
+            container.innerHTML = `
+                <!-- VALOR DA META SEMANAL DINÂMICA COM MARGEM DE SEGURANÇA -->
+                <div class="meta-card">
+                    <span class="meta-card-label">Meta Semanal (Com Margem)</span>
+                    <h2 class="meta-card-value">${formatBRL(data.totalWeeklyMeta)}</h2>
+                    <p class="meta-card-desc">Cálculo contínuo com acréscimo de +${marginPercent}% de margem.</p>
+                </div>
+                
+                <!-- CONTROLE INTERATIVO DA MARGEM DE SEGURANÇA -->
+                <div class="margin-controller-container">
+                    <span class="margin-controller-label">Margem de Segurança:</span>
+                    <div class="margin-controls-group">
+@@ -940,7 +932,6 @@
+                    </div>
+                </div>
 
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-msg').textContent = msg;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 2000);
-        }
+                <!-- DETALHES DA COMPOSIÇÃO DA META -->
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <span class="summary-label">Meta Faturas (Base)</span>
+@@ -971,7 +962,7 @@
+                    <h3 class="section-title">Esforço Semanal Requerido</h3>
+                    ${state.cards.length === 0 ? `
+                        <div class="item-card" style="text-align: center; padding: 24px; color: var(--text-muted); border: 1px dashed var(--border-color);">
+                            Nenhum cartão adicionado. Clica no botão "+" abaixo para começares!
+                            Nenhum cartão adicionado. Clique no botão "+" abaixo para começar!
+                        </div>
+                    ` : data.processedCards.map(c => {
+                        let color = c.daysRemaining < 0 ? 'rose' : (c.daysRemaining <= 7 ? 'amber' : 'green');
+@@ -996,14 +987,14 @@
+                <div class="list-container">
+                    ${state.cards.length === 0 ? `
+                        <div class="item-card" style="text-align: center; padding: 24px; color: var(--text-muted); border: 1px dashed var(--border-color);">
+                            Nenhum cartão cadastrado. Clica no botão "+" abaixo para adicionares o teu primeiro cartão!
+                            Nenhum cartão cadastrado. Clique no botão "+" abaixo para adicionar o seu primeiro cartão!
+                        </div>
+                    ` : data.processedCards.map(c => `
+                        <div class="item-card">
+                            <div class="item-card-header">
+                                <div>
+                                    <h3 class="item-title">${c.name}</h3>
+                                    <span class="item-subtitle">Próximo Vencimento: ${c.computedDueDate.toLocaleDateString('pt-PT')} (Dia ${c.dueDay})</span>
+                                    <span class="item-subtitle">Próximo Vencimento: ${c.computedDueDate.toLocaleDateString('pt-BR')} (Dia ${c.dueDay})</span>
+                                </div>
+                                <div class="item-value-side"><span class="item-value-label">Total</span><span class="item-value-main">${formatBRL(c.totalBill)}</span></div>
+                            </div>
+@@ -1031,7 +1022,7 @@
+                <div class="list-container">
+                    ${state.loans.length === 0 ? `
+                        <div class="item-card" style="text-align: center; padding: 24px; color: var(--text-muted); border: 1px dashed var(--border-color);">
+                            Nenhum registo de partilha. Clica no botão "+" e muda para a aba de "Partilha" para registares quem te deve!
+                            Nenhuma partilha registrada. Clique no botão "+" e mude para a aba de "Partilha" para registrar quem te deve!
+                        </div>
+                    ` : state.loans.map(l => {
+                        const total = parseFloat(l.MP || 0) + parseFloat(l.PP || 0) + parseFloat(l.SAN || 0) + parseFloat(l.NIO || 0);
+@@ -1064,13 +1055,13 @@
+        function renderDiario(container) {
+            container.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <h3 class="section-title" style="margin: 0;">Registo Cronológico de Ações</h3>
+                    <h3 class="section-title" style="margin: 0;">Registro Cronológico de Ações</h3>
+                    <button class="btn-action delete" style="padding: 6px 12px; font-size: 10px; min-width: auto; flex: none" onclick="clearJournal()">Limpar Diário</button>
+                </div>
+                <div class="list-container">
+                    ${state.history.length === 0 ? `
+                        <div class="item-card" style="text-align: center; padding: 24px; color: var(--text-muted); border: 1px dashed var(--border-color);">
+                            Nenhum registo no diário ainda. Todas as tuas despesas e pagamentos aparecerão aqui automaticamente!
+                            Nenhum registro no diário ainda. Todas as suas despesas e pagamentos aparecerão aqui automaticamente!
+                        </div>
+                    ` : state.history.map(h => `
+                        <div class="item-card" style="padding: 14px; gap: 8px;">
+@@ -1092,9 +1083,9 @@
 
-        function updateSimulatedToday(val) {
-            simulatedTodayStr = val;
-            saveState();
-            const dateObj = new Date(simulatedTodayStr + 'T00:00:00');
-            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-            document.getElementById('current-badge-date').textContent = `${monthNames[dateObj.getMonth()]} ${dateObj.getFullYear()}`;
-            renderActiveTab();
-        }
+        // Limpar o diário com confirmação
+        window.clearJournal = function() {
+            if (confirm("Tem a certeza de que deseja limpar permanentemente todo o histórico do Livro Diário?")) {
+            if (confirm("Tem certeza de que deseja limpar permanentemente todo o histórico do Livro Diário?")) {
+                state.history = [
+                    { id: 'sys-init', date: new Date().toLocaleString('pt-PT'), type: 'criacao', description: 'Livro Diário limpo pelo utilizador.', amount: 0 }
+                    { id: 'sys-init', date: new Date().toLocaleString('pt-BR'), type: 'criacao', description: 'Livro Diário limpo pelo usuário.', amount: 0 }
+                ];
+                saveState();
+                renderActiveTab();
+@@ -1116,7 +1107,7 @@
+                // 1. Criar dados para a primeira aba: "Resumo & Cartões"
+                const summaryHeader = [
+                    ["GESTOR FINANCEIRO - METAS SEMANAIS"],
+                    ["Data da Exportação", new Date().toLocaleDateString('pt-PT')],
+                    ["Data da Exportação", new Date().toLocaleDateString('pt-BR')],
+                    [],
+                    ["MÉTRICAS GERAIS"],
+                    ["Minha Meta Semanal (Com Margem)", calcs.totalWeeklyMeta],
+@@ -1135,7 +1126,7 @@
+                        c.name,
+                        c.totalBill,
+                        c.dueDay,
+                        c.computedDueDate.toLocaleDateString('pt-PT'),
+                        c.computedDueDate.toLocaleDateString('pt-BR'),
+                        c.loansTotal,
+                        c.prepaidAmount,
+                        c.myShare,
+@@ -1182,8 +1173,8 @@
 
-        window.adjustSafetyMargin = function(increment) {
-            let currentPercentage = Math.round(state.safetyMargin * 100);
-            let newPercentage = currentPercentage + (increment ? 5 : -5);
-            if (newPercentage < 0) newPercentage = 0;
-            if (newPercentage > 100) newPercentage = 100;
-            state.safetyMargin = newPercentage / 100;
-            saveState();
-            renderActiveTab();
-            showToast(`Margem de segurança ajustada para ${newPercentage}%`);
-        };
+                // 3. Criar dados para a terceira aba: "Livro Diário"
+                const journalHeader = [
+                    ["LIVRO DIÁRIO - REGISTO DE TRANSAÇÕES"],
+                    ["Ficheiro auditado cronologicamente"],
+                    ["LIVRO DIÁRIO - REGISTRO DE TRANSAÇÕES"],
+                    ["Arquivo auditado cronologicamente"],
+                    [],
+                    ["Data/Hora", "Tipo de Ação", "Descrição do Evento", "Valor Associado (R$)"]
+                ];
+@@ -1200,12 +1191,19 @@
+                const wsJournal = XLSX.utils.aoa_to_sheet(journalHeader);
+                XLSX.utils.book_append_sheet(wb, wsJournal, "Livro Diário");
 
-        function getNextDueDate(dueDay, today) {
-            let year = today.getFullYear();
-            let month = today.getMonth();
-            let candidate = new Date(year, month, dueDay, 0, 0, 0);
-            const diffTime = candidate - today;
-            const diffDays = diffTime / (1000 * 60 * 60 * 24);
-            if (candidate < today || diffDays < 7) {
-                candidate = new Date(year, month + 1, dueDay, 0, 0, 0);
-            }
-            return candidate;
-        }
+                // Gerar e descarregar o ficheiro .xlsx completo
+                XLSX.writeFile(wb, `Gestor_Financas_Completo_${new Date().toISOString().split('T')[0]}.xlsx`);
+                showToast("Ficheiro Excel (3 abas) exportado com sucesso!");
+                // Configuração da data no formato dd_mm_aaaa para o nome do arquivo
+                const d = new Date();
+                const day = String(d.getDate()).padStart(2, '0');
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const year = d.getFullYear();
+                const formattedDate = `${day}_${month}_${year}`;
 
-        // --- SISTEMA INTEGRAÇÃO EXCEL VIA SHEETJS ---
-        window.exportDataToExcel = function() {
-            if (state.cards.length === 0 && state.loans.length === 0) {
-                showToast("Não existem dados para exportar!");
-                return;
-            }
-
-            try {
-                const wb = XLSX.utils.book_new();
-
-                // 1. Tabela de Cartões
-                const cardsData = state.cards.map(c => ({
-                    "Nome do Cartão": c.name,
-                    "Fatura Total (R$)": c.totalBill,
-                    "Dia de Vencimento": c.dueDay,
-                    "Adiantamentos (R$)": c.prepaid || 0
-                }));
-                const wsCards = XLSX.utils.json_to_sheet(cardsData);
-                XLSX.utils.book_append_sheet(wb, wsCards, "Cartões e Despesas");
-
-                // 2. Tabela de Partilhas
-                const loansData = state.loans.map(l => ({
-                    "Identificador / Mês": l.name,
-                    "Mercado Pago (R$)": l.MP || 0,
-                    "PicPay (R$)": l.PP || 0,
-                    "Santander (R$)": l.SAN || 0,
-                    "Nio (R$)": l.NIO || 0
-                }));
-                const wsLoans = XLSX.utils.json_to_sheet(loansData);
-                XLSX.utils.book_append_sheet(wb, wsLoans, "Partilhas (Devedores)");
-
-                // 3. Tabela de Histórico
-                const historyData = state.history.map(h => ({
-                    "Data / Hora": h.date,
-                    "Tipo Movimento": h.type.toUpperCase(),
-                    "Descrição": h.description,
-                    "Valor Operação (R$)": h.amount
-                }));
-                const wsHistory = XLSX.utils.json_to_sheet(historyData);
-                XLSX.utils.book_append_sheet(wb, wsHistory, "Histórico Diário");
-
-                // Gerar arquivo final
-                XLSX.writeFile(wb, `MetaSemanal_Backup_${simulatedTodayStr}.xlsx`);
-                showToast("Ficheiro Excel gerado!");
+                // Gerar e descarregar o arquivo .xlsx completo com a nova formatação de data
+                XLSX.writeFile(wb, `Gestor_Financas_Completo_${formattedDate}.xlsx`);
+                showToast("Arquivo Excel (3 abas) exportado com sucesso!");
             } catch (err) {
-                console.error(err);
-                showToast("Erro ao exportar dados.");
-            }
-        };
-
-        function switchTab(tabId) {
-            state.currentTab = tabId;
-            document.querySelectorAll('nav .nav-btn').forEach(btn => btn.classList.remove('active'));
-            const activeBtn = document.getElementById(`nav-${tabId}`);
-            if (activeBtn) activeBtn.classList.add('active');
-            renderActiveTab();
-        }
-
-        function openAddModal() {
-            state.editingId = null;
-            document.getElementById('modal-title').textContent = "Novo Registo";
-            setModalType(state.modalType);
-            document.getElementById('modal').classList.add('open');
-        }
-
-        function closeAddModal() {
-            document.getElementById('modal').classList.remove('open');
-        }
-
-        function handleOverlayClick(e) {
-            if (e.target.id === 'modal') closeAddModal();
-        }
-
-        function setModalType(type) {
-            state.modalType = type;
-            document.getElementById('m-tab-cartao').classList.toggle('active', type === 'cartao');
-            document.getElementById('m-tab-partilha').classList.toggle('active', type === 'partilha');
-            
-            const fieldsContainer = document.getElementById('form-fields');
-            if (type === 'cartao') {
-                fieldsContainer.innerHTML = `
-                    <div class="form-group">
-                        <label class="form-label">Nome do Cartão / Despesa</label>
-                        <input type="text" id="f-card-name" required class="form-control" placeholder="Ex: Mercado Pago, Gasolina">
-                    </div>
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label class="form-label">Valor Fatura (R$)</label>
-                            <input type="number" step="0.01" id="f-card-bill" required class="form-control" placeholder="0.00">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Dia Vencimento</label>
-                            <input type="number" min="1" max="31" id="f-card-day" required class="form-control" placeholder="1 a 31">
-                        </div>
-                    </div>
-                `;
-            } else {
-                fieldsContainer.innerHTML = `
-                    <div class="form-group">
-                        <label class="form-label">Identificação da Partilha (Mês/Ref)</label>
-                        <input type="text" id="f-loan-name" required class="form-control" placeholder="Ex: Janeiro">
-                    </div>
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label class="form-label">Mercado Pago (R$)</label>
-                            <input type="number" step="0.01" id="f-loan-mp" class="form-control" placeholder="0.00">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">PicPay (R$)</label>
-                            <input type="number" step="0.01" id="f-loan-pp" class="form-control" placeholder="0.00">
-                        </div>
-                    </div>
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label class="form-label">Santander (R$)</label>
-                            <input type="number" step="0.01" id="f-loan-san" class="form-control" placeholder="0.00">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Nio (R$)</label>
-                            <input type="number" step="0.01" id="f-loan-nio" class="form-control" placeholder="0.00">
-                        </div>
-                    </div>
-                `;
+                console.error("Erro na exportação Excel:", err);
+                showToast("Erro ao gerar o ficheiro Excel.");
+                showToast("Erro ao gerar o arquivo Excel.");
             }
         }
 
+@@ -1260,7 +1258,7 @@
+                    state.cards.push({ id: Date.now().toString(), name, totalBill, dueDay, prepaid });
+                    logToJournal('criacao', `Criação do cartão/despesa ${name} com vencimento no dia ${dueDay}.`, totalBill);
+                    if (prepaid > 0) {
+                        logToJournal('adiantamento', `Adiantamento registado na criação do cartão ${name}.`, prepaid);
+                        logToJournal('adiantamento', `Adiantamento registrado na criação do cartão ${name}.`, prepaid);
+                    }
+                }
+                switchTab('cartoes');
+@@ -1278,13 +1276,13 @@
+                    logToJournal('edicao', `Atualização da partilha de ${name}. Total devedor: ${formatBRL(sum)}.`, sum);
+                } else {
+                    state.loans.push({ id: Date.now().toString(), name, MP, PP, SAN, NIO });
+                    logToJournal('criacao', `Nova partilha registada para ${name}. Valor em dívida: ${formatBRL(sum)}.`, sum);
+                    logToJournal('criacao', `Nova partilha registrada para ${name}. Valor em dívida: ${formatBRL(sum)}.`, sum);
+                }
+                switchTab('partilhas');
+            }
+            saveState();
+            closeAddModal();
+            showToast('Guardado com sucesso!');
+            showToast('Salvo com sucesso!');
+        }
+
+        window.editCard = function(id) {
+@@ -1322,57 +1320,57 @@
+            const loanObj = state.loans.find(i => i.id === id);
+            if (loanObj && confirm(`Remover devedor ${loanObj.name}?`)) {
+                const total = parseFloat(loanObj.MP || 0) + parseFloat(loanObj.PP || 0) + parseFloat(loanObj.SAN || 0) + parseFloat(loanObj.NIO || 0);
+                logToJournal('remocao', `Remoção do registo de devedor: ${loanObj.name}.`, -total);
+                logToJournal('remocao', `Remoção do registro de devedor: ${loanObj.name}.`, -total);
+                state.loans = state.loans.filter(i => i.id !== id);
+                saveState();
+                renderActiveTab();
+            }
+        }
+
+        // --- SISTEMA DE MODAL DE ADIANTAMENTO RÁPIDO (DÉBITO/PIX) ---
         window.openPayModal = function(id, name) {
+            const c = state.cards.find(item => item.id === id);
+            if (!c) return;
             document.getElementById('pay-card-id').value = id;
-            document.getElementById('pay-card-label').textContent = `Cartão / Despesa: ${name}`;
+            document.getElementById('pay-card-label').textContent = `Adiantar Cartão: ${name} (Fatura Atual: ${formatBRL(c.totalBill)})`;
             document.getElementById('pay-amount').value = '';
             document.getElementById('pay-modal').classList.add('open');
-        };
+        }
 
         window.closePayModal = function() {
             document.getElementById('pay-modal').classList.remove('open');
-        };
+        }
 
         window.handlePayOverlayClick = function(e) {
             if (e.target.id === 'pay-modal') closePayModal();
-        };
+        }
 
         window.submitPayment = function(e) {
             e.preventDefault();
             const id = document.getElementById('pay-card-id').value;
             const amount = parseFloat(document.getElementById('pay-amount').value) || 0;
-            
-            const cardIndex = state.cards.findIndex(c => c.id === id);
-            if (cardIndex !== -1) {
-                const currentPrepaid = parseFloat(state.cards[cardIndex].prepaid || 0);
-                state.cards[cardIndex].prepaid = currentPrepaid + amount;
-                logToJournal('adiantamento', `Adiantamento efetuado no cartão ${state.cards[cardIndex].name}.`, amount);
+
+            const idx = state.cards.findIndex(c => c.id === id);
+            if (idx !== -1) {
+                const currentPrepaid = parseFloat(state.cards[idx].prepaid || 0);
+                state.cards[idx].prepaid = currentPrepaid + amount;
+
+                // Grava a transação no diário
+                logToJournal('adiantamento', `Adiantamento via Débito/Pix efetuado no cartão ${state.cards[idx].name}.`, amount);
+
                 saveState();
                 closePayModal();
+                showToast(`Pago ${formatBRL(amount)} no débito!`);
                 renderActiveTab();
-                showToast("Adiantamento registado!");
-            }
-        };
-
-        window.saveRecord = function(e) {
-            e.preventDefault();
-            if (state.modalType === 'cartao') {
-                const name = document.getElementById('f-card-name').value;
-                const bill = parseFloat(document.getElementById('f-card-bill').value) || 0;
-                const day = parseInt(document.getElementById('f-card-day').value) || 1;
-                
-                state.cards.push({ id: Date.now().toString(), name, totalBill: bill, dueDay: day, prepaid: 0 });
-                logToJournal('criacao', `Cartão/Despesa adicionado: ${name}`, bill);
-            } else {
-                const name = document.getElementById('f-loan-name').value;
-                const mp = parseFloat(document.getElementById('f-loan-mp').value) || 0;
-                const pp = parseFloat(document.getElementById('f-loan-pp').value) || 0;
-                const san = parseFloat(document.getElementById('f-loan-san').value) || 0;
-                const nio = parseFloat(document.getElementById('f-loan-nio').value) || 0;
-                
-                state.loans.push({ id: Date.now().toString(), name, MP: mp, PP: pp, SAN: san, NIO: nio });
-                logToJournal('criacao', `Rateio de partilha adicionado para ${name}`, (mp+pp+san+nio));
-            }
-            saveState();
-            closeAddModal();
-            renderActiveTab();
-            showToast("Guardado com sucesso!");
-        };
-
-        window.deleteCard = function(id) {
-            if(confirm("Deseja apagar este cartão?")) {
-                const card = state.cards.find(c => c.id === id);
-                state.cards = state.cards.filter(c => c.id !== id);
-                logToJournal('remocao', `Cartão removido do sistema: ${card ? card.name : id}`, card ? card.totalBill : 0);
-                saveState();
-                renderActiveTab();
-            }
-        };
-
-        window.deleteLoan = function(id) {
-            if(confirm("Deseja apagar esta partilha?")) {
-                const loan = state.loans.find(l => l.id === id);
-                state.loans = state.loans.filter(l => l.id !== id);
-                logToJournal('remocao', `Partilha/Dívida removida do sistema: ${loan ? loan.name : id}`, 0);
-                saveState();
-                renderActiveTab();
-            }
-        };
-
-        function renderActiveTab() {
-            const container = document.getElementById('main-content');
-            const today = new Date(simulatedTodayStr + 'T00:00:00');
-            
-            // Cálculos Globais
-            let cardLoans = { NIO:0, MP:0, SAN:0, PP:0 };
-            state.loans.forEach(l => {
-                cardLoans.MP += parseFloat(l.MP || 0);
-                cardLoans.PP += parseFloat(l.PP || 0);
-                cardLoans.SAN += parseFloat(l.SAN || 0);
-                cardLoans.NIO += parseFloat(l.NIO || 0);
-            });
-
-            let globalWeeklyMeta = 0;
-            let globalTotalBills = 0;
-            let globalTotalPrepaid = 0;
-            let globalTotalLoans = cardLoans.MP + cardLoans.PP + cardLoans.SAN + cardLoans.NIO;
-
-            const computedCards = state.cards.map(c => {
-                let currentLoans = 0;
-                const nameUpper = c.name.toUpperCase();
-                if (nameUpper.includes('NIO')) currentLoans = cardLoans.NIO;
-                else if (nameUpper.includes('MERCADO') || nameUpper.includes('MP')) currentLoans = cardLoans.MP;
-                else if (nameUpper.includes('SANTANDER') || nameUpper.includes('SAN')) currentLoans = cardLoans.SAN;
-                else if (nameUpper.includes('PICPAY') || nameUpper.includes('PP')) currentLoans = cardLoans.PP;
-
-                const prepaidAmount = parseFloat(c.prepaid || 0);
-                globalTotalPrepaid += prepaidAmount;
-                globalTotalBills += c.totalBill;
-
-                let myShare = c.totalBill - currentLoans - prepaidAmount;
-                if (myShare < 0) myShare = 0;
-
-                const nextDueDate = getNextDueDate(c.dueDay, today);
-                const diffDays = (nextDueDate - today) / (1000 * 60 * 60 * 24);
-                let weeks = diffDays / 7;
-                if (weeks < 1) weeks = 1;
-
-                const weeklyContribution = myShare / weeks;
-                globalWeeklyMeta += weeklyContribution;
-
-                return { ...c, nextDueDate, diffDays, weeks, myShare, currentLoans };
-            });
-
-            if (state.currentTab === 'dashboard') {
-                let marginAdded = globalWeeklyMeta * state.safetyMargin;
-                let finalWeeklyMeta = globalWeeklyMeta + marginAdded;
-
-                container.innerHTML = `
-                    <div class="meta-card">
-                        <span class="meta-card-label">META SEMANAL FIXADA</span>
-                        <div class="meta-card-value">${formatBRL(finalWeeklyMeta)}</div>
-                        <p class="meta-card-desc">Cálculo estruturado proporcional com base técnica</p>
-                    </div>
-
-                    <div class="margin-controller-container">
-                        <span class="margin-controller-label">Margem de Segurança</span>
-                        <div class="margin-controls-group">
-                            <div class="btn-margin-adjust" onclick="adjustSafetyMargin(false)">-</div>
-                            <span class="margin-display-value">${Math.round(state.safetyMargin * 100)}%</span>
-                            <div class="btn-margin-adjust" onclick="adjustSafetyMargin(true)">+</div>
-                        </div>
-                    </div>
-
-                    <div class="summary-grid">
-                        <div class="summary-card">
-                            <span class="summary-label">Fatura Bruta</span>
-                            <span class="summary-value">${formatBRL(globalTotalBills)}</span>
-                        </div>
-                        <div class="summary-card">
-                            <span class="summary-label">Total Partilhas</span>
-                            <span class="summary-value" style="color:var(--secondary)">${formatBRL(globalTotalLoans)}</span>
-                        </div>
-                    </div>
-
-                    <div class="summary-grid">
-                        <div class="summary-card">
-                            <span class="summary-label">Adiantado (Pix/Déb)</span>
-                            <span class="summary-value" style="color:var(--primary)">${formatBRL(globalTotalPrepaid)}</span>
-                        </div>
-                        <div class="summary-card">
-                            <span class="summary-label">Meta sem Margem</span>
-                            <span class="summary-value">${formatBRL(globalWeeklyMeta)}</span>
-                        </div>
-                    </div>
-
-                    <div class="form-group" style="background-color: var(--bg-card); padding:16px; border-radius:16px; border: 1px solid var(--border-color)">
-                        <label class="form-label" style="margin-bottom:8px">Simulador Temporal (Ajuste de Data Atual)</label>
-                        <input type="date" value="${simulatedTodayStr}" onchange="updateSimulatedToday(this.value)" class="form-control">
-                    </div>
-                `;
-            }
-            else if (state.currentTab === 'cartoes') {
-                let html = `<h2 class="section-title">Meus Cartões e Despesas (${computedCards.length})</h2><div class="list-container">`;
-                if(computedCards.length === 0) {
-                    html += `<p style="font-size:12px; color:var(--text-muted); text-align:center; padding:20px;">Nenhum cartão cadastrado no armazenamento local.</p>`;
-                }
-                computedCards.forEach(c => {
-                    let statusClass = "green";
-                    if (c.diffDays <= 7) statusClass = "rose";
-                    else if (c.diffDays <= 14) statusClass = "amber";
-
-                    html += `
-                        <div class="item-card">
-                            <div class="item-card-header">
-                                <div class="item-title-wrapper">
-                                    <div class="status-dot ${statusClass}"></div>
-                                    <div>
-                                        <div class="item-title">${c.name.toUpperCase()}</div>
-                                        <div class="item-subtitle">Vence dia ${c.dueDay} (${Math.round(c.diffDays)} dias restantes)</div>
-                                    </div>
-                                </div>
-                                <div class="item-value-side">
-                                    <div class="item-value-label">Bruto</div>
-                                    <div class="item-value-main">${formatBRL(c.totalBill)}</div>
-                                </div>
-                            </div>
-
-                            <div class="info-grid-3">
-                                <div class="info-cell">
-                                    <span class="info-grid-label">Partilhas (-)</span>
-                                    <span class="info-grid-value teal">${formatBRL(c.currentLoans)}</span>
-                                </div>
-                                <div class="info-cell">
-                                    <span class="info-grid-label">Adiantado (-)</span>
-                                    <span class="info-grid-value emerald">${formatBRL(c.prepaid || 0)}</span>
-                                </div>
-                                <div class="info-cell">
-                                    <span class="info-grid-label">Líquido</span>
-                                    <span class="info-grid-value" style="color:#ffffff">${formatBRL(c.myShare)}</span>
-                                </div>
-                            </div>
-
-                            <div class="card-actions">
-                                <div class="meta-base-text">Meta Semanal: <span class="meta-base-value">${formatBRL(c.myShare / c.weeks)}/sem</span></div>
-                                <div class="action-button-group">
-                                    <button class="btn-action edit" onclick="openPayModal('${c.id}', '${c.name}')">Adiantar</button>
-                                    <button class="btn-action delete" onclick="deleteCard('${c.id}')">Apagar</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-                html += `</div>`;
-                container.innerHTML = html;
-            }
-            else if (state.currentTab === 'partilhas') {
-                let html = `<h2 class="section-title">Divisões / Devedores Ativos (${state.loans.length})</h2><div class="list-container">`;
-                if(state.loans.length === 0) {
-                    html += `<p style="font-size:12px; color:var(--text-muted); text-align:center; padding:20px;">Nenhuma partilha cadastrada no armazenamento local.</p>`;
-                }
-                state.loans.forEach(l => {
-                    let totalL = parseFloat(l.MP||0)+parseFloat(l.PP||0)+parseFloat(l.SAN||0)+parseFloat(l.NIO||0);
-                    html += `
-                        <div class="item-card">
-                            <div class="item-card-header">
-                                <div>
-                                    <div class="item-title">${l.name.toUpperCase()}</div>
-                                    <div class="item-subtitle">Mapeamento de descontos associados</div>
-                                </div>
-                                <div class="item-value-side">
-                                    <div class="item-value-label">Total Redução</div>
-                                    <div class="item-value-main" style="color:var(--secondary)">${formatBRL(totalL)}</div>
-                                </div>
-                            </div>
-                            <div class="info-grid">
-                                <div class="info-row"><span>Mercado Pago:</span><span>${formatBRL(l.MP||0)}</span></div>
-                                <div class="info-row"><span>PicPay:</span><span>${formatBRL(l.PP||0)}</span></div>
-                                <div class="info-row"><span>Santander:</span><span>${formatBRL(l.SAN||0)}</span></div>
-                                <div class="info-row"><span>Nio:</span><span>${formatBRL(l.NIO||0)}</span></div>
-                            </div>
-                            <div style="display:flex; justify-content:flex-end; margin-top:4px;">
-                                <button class="btn-action delete" onclick="deleteLoan('${l.id}')">Apagar</button>
-                            </div>
-                        </div>
-                    `;
-                });
-                html += `</div>`;
-                container.innerHTML = html;
-            }
-            else if (state.currentTab === 'diario') {
-                let html = `<h2 class="section-title">Livro Diário Cronológico</h2><div class="list-container">`;
-                state.history.forEach(h => {
-                    html += `
-                        <div class="item-card" style="padding:14px; gap:8px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span class="journal-badge ${h.type}">${h.type}</span>
-                                <span style="font-size:10px; color:var(--text-muted); font-weight:600">${h.date}</span>
-                            </div>
-                            <p style="font-size:12px; color:#e2e8f0; line-height:1.4;">${h.description}</p>
-                            ${h.amount > 0 ? `<div style="font-size:11px; font-weight:700; color:var(--primary); text-align:right;">Valor envolvido: + ${formatBRL(h.amount)}</div>` : ''}
-                        </div>
-                    `;
-                });
-                html += `</div>`;
-                container.innerHTML = html;
             }
         }
 
-        // Inicialização Inicial Forçada do Painel
-        updateSimulatedToday(simulatedTodayStr);
+        window.onload = function() {
+            const realToday = getRealTodayString();
+            simulatedTodayStr = realToday;
+            localStorage.setItem('simulated_today', realToday);
+            updateSimulatedToday(realToday);
+        };
     </script>
 </body>
 </html>

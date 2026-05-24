@@ -757,7 +757,6 @@
             // Campos do sistema de salário
             salaryValue: parseFloat(localStorage.getItem('salaryValue')) || 0,
             salaryDay: parseInt(localStorage.getItem('salaryDay')) || 1,
-            weeklySalaryDiscount: parseFloat(localStorage.getItem('weeklySalaryDiscount')) || 0,
 
             activeTab: 'dashboard',
             modalMode: 'create',
@@ -774,7 +773,6 @@
             
             localStorage.setItem('salaryValue', state.salaryValue.toString());
             localStorage.setItem('salaryDay', state.salaryDay.toString());
-            localStorage.setItem('weeklySalaryDiscount', state.weeklySalaryDiscount.toString());
         }
 
         function showToast(msg) {
@@ -845,7 +843,7 @@
             return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         }
 
-        // --- MOTOR FINANCEIRO ---
+        // --- MOTOR FINANCEIRO COM ABATIMENTO DINÂMICO E AUTOMÁTICO DE SALÁRIO ---
         function calculateWeeklyMetas() {
             const [todayYear, todayMonth, todayDay] = simulatedTodayStr.split('-').map(Number);
             const today = new Date(todayYear, todayMonth - 1, todayDay);
@@ -908,8 +906,20 @@
             // Meta Semanal com margem de segurança aplicada
             const totalWeeklyMetaWithMargin = baseWeeklyMeta * (1 + state.safetyMargin);
 
-            // APLICAÇÃO DO DESCONTO SEMANAL RETROATIVO DO SALÁRIO ANTES DELE CHEGAR
-            const finalNetWeeklyMeta = Math.max(0, totalWeeklyMetaWithMargin - state.weeklySalaryDiscount);
+            // --- CÁLCULO DINÂMICO DO DESCONTO SEMANAL DO SALÁRIO ---
+            const daysToPayday = getDaysUntilPayday();
+            let calculatedWeeklySalaryDiscount = 0;
+
+            if (state.salaryValue > 0) {
+                // Converte dias restantes em semanas inteiras/fração de semanas
+                const weeksToPayday = Math.max(1, daysToPayday / 7);
+                
+                // À medida que weeksToPayday diminui (ex: de 4 para 3, para 2, para 1), o desconto semanal aumenta automaticamente!
+                calculatedWeeklySalaryDiscount = state.salaryValue / weeksToPayday;
+            }
+
+            // APLICAÇÃO DO DESCONTO ACELERADO DO SALÁRIO ANTES DELE CHEGAR
+            const finalNetWeeklyMeta = Math.max(0, totalWeeklyMetaWithMargin - calculatedWeeklySalaryDiscount);
 
             return {
                 processedCards,
@@ -919,6 +929,7 @@
                 totalMyShare,
                 baseWeeklyMeta,
                 totalWeeklyMeta: totalWeeklyMetaWithMargin,
+                calculatedWeeklySalaryDiscount,
                 finalNetWeeklyMeta
             };
         }
@@ -964,7 +975,7 @@
                     <span class="meta-card-label">Meta Semanal Líquida Final</span>
                     <h2 class="meta-card-value">${formatBRL(data.finalNetWeeklyMeta)}</h2>
                     <p class="meta-card-desc">
-                        Meta com margem (${formatBRL(data.totalWeeklyMeta)}) menos Abatimento de Salário Antecipado (-${formatBRL(state.weeklySalaryDiscount)}).
+                        Meta com margem (${formatBRL(data.totalWeeklyMeta)}) menos Abatimento Dinâmico de Salário (-${formatBRL(data.calculatedWeeklySalaryDiscount)}).
                     </p>
                 </div>
                 
@@ -984,7 +995,7 @@
                     </div>
                     <div class="summary-card">
                         <span class="summary-label">Abatimento de Salário</span>
-                        <span class="summary-value" style="color: #a78bfa;">-${formatBRL(state.weeklySalaryDiscount)}</span>
+                        <span class="summary-value" style="color: #a78bfa;">-${formatBRL(data.calculatedWeeklySalaryDiscount)}</span>
                     </div>
                 </div>
 
@@ -1106,7 +1117,6 @@
                         </div>
                     ` : state.loans.map(l => {
                         const total = getLoanTotal(l);
-                        // Suporte retroativo caso debtorName não exista
                         const displayName = l.debtorName || "Co-responsável";
                         return `
                             <div class="item-card">
@@ -1138,45 +1148,48 @@
             `;
         }
 
-        // --- RENDER SALÁRIO ---
+        // --- RENDER SALÁRIO (CÁLCULO AUTOMÁTICO DE ACELERAÇÃO) ---
         function renderSalario(container) {
             const daysLeft = getDaysUntilPayday();
+            const calcs = calculateWeeklyMetas();
             
             container.innerHTML = `
                 <h3 class="section-title">Configurações de Salário</h3>
                 
                 <div class="item-card" style="margin-bottom: 20px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <span class="item-title" style="color: #a78bfa;">Próximo Salário</span>
+                        <span class="item-title" style="color: #a78bfa;">Status do Mês</span>
                         <span class="status-pill green">Faltam ${daysLeft} dias</span>
                     </div>
-                    <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
-                        Seu salário está previsto para o dia <strong>${state.salaryDay}</strong> de cada mês. Você pode usar a projeção semanal abaixo para reduzir a sua meta antes mesmo do salário ser depositado.
+                    <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px;">
+                        Seu salário está previsto para o dia <strong>${state.salaryDay}</strong>. O sistema agora calcula a proximidade do pagamento automaticamente!
                     </p>
+                    <div style="border-top: 1px dashed var(--border-color); padding-top: 10px; margin-top: 10px; display: flex; justify-content: space-between; font-size: 13px;">
+                        <span style="color: var(--text-muted);">Abatimento Semanal Ativo:</span>
+                        <span style="font-weight: 800; color: #a78bfa;">+ ${formatBRL(calcs.calculatedWeeklySalaryDiscount)} / semana</span>
+                    </div>
                 </div>
 
                 <div class="item-card">
                     <form onsubmit="saveSalarySettings(event)">
                         <div class="form-group">
                             <label class="form-label">Valor Estimado do Salário Mensal (R$)</label>
-                            <input type="number" step="0.01" min="0" required id="f-salary-value" class="form-input" placeholder="Ex: 3000.00" value="${state.salaryValue}">
+                            <input type="number" step="0.01" min="0" required id="f-salary-value" class="form-input" placeholder="Ex: 1000.00" value="${state.salaryValue}">
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label">Dia de Recebimento do Salário (Geralmente dia 1)</label>
+                            <label class="form-label">Dia de Recebimento do Salário</label>
                             <input type="number" min="1" max="31" required id="f-salary-day" class="form-input" placeholder="Ex: 1" value="${state.salaryDay}">
                         </div>
 
-                        <div class="form-group" style="border-top: 1px dashed var(--border-color); padding-top: 16px; margin-top: 16px;">
-                            <label class="form-label" style="color: #a78bfa; font-weight: 800;">Abatimento Semanal Projetado (R$)</label>
-                            <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px; line-height: 1.4;">
-                                Insira o valor semanal do salário que você deseja antecipar para cobrir as contas. 
-                                <strong>Esse valor será descontado diretamente da sua Meta Semanal líquida no painel de Metas.</strong>
+                        <div style="margin-top: 16px; padding: 12px; border-radius: 10px; background-color: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.15);">
+                            <h4 style="font-size: 12px; font-weight: 800; color: #60a5fa; margin-bottom: 6px;">Como funciona a aceleração de meta:</h4>
+                            <p style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">
+                                Se seu salário é R$ 1.000,00 e faltam 4 semanas, ele abate R$ 250,00 da meta desta semana. À medida que o dia ${state.salaryDay} se aproxima, as semanas restantes caem e o abatimento semanal aumenta automaticamente (R$ 333,00, R$ 500,00, até o valor total quando estiver na última semana), retroagindo agressivamente a sua meta antes mesmo dele cair!
                             </p>
-                            <input type="number" step="0.01" min="0" required id="f-salary-weekly-discount" class="form-input" placeholder="Ex: 500.00" value="${state.weeklySalaryDiscount}">
                         </div>
 
-                        <button type="submit" class="btn-submit" style="background-color: var(--accent-color);">Salvar Configuração de Salário</button>
+                        <button type="submit" class="btn-submit" style="background-color: var(--accent-color); margin-top: 16px;">Salvar Configurações de Salário</button>
                     </form>
                 </div>
             `;
@@ -1186,14 +1199,12 @@
             e.preventDefault();
             const salaryVal = parseFloat(document.getElementById('f-salary-value').value) || 0;
             const salaryD = parseInt(document.getElementById('f-salary-day').value) || 1;
-            const weeklyDiscount = parseFloat(document.getElementById('f-salary-weekly-discount').value) || 0;
 
             state.salaryValue = salaryVal;
             state.salaryDay = salaryD;
-            state.weeklySalaryDiscount = weeklyDiscount;
 
             saveState();
-            logToJournal('salario', `Configuração de salário atualizada. Salário: ${formatBRL(salaryVal)}, Abatimento semanal: ${formatBRL(weeklyDiscount)}.`, salaryVal);
+            logToJournal('salario', `Configuração de salário atualizada. Valor: ${formatBRL(salaryVal)}, Dia de recebimento: ${salaryD}.`, salaryVal);
             showToast('Configurações de Salário salvas!');
             switchTab('dashboard');
         }
@@ -1251,7 +1262,7 @@
                     ["Minha Meta Semanal Ajustada (Final)", calcs.finalNetWeeklyMeta],
                     ["Meta Semanal Base (Sem Margem)", calcs.baseWeeklyMeta],
                     ["Meta Semanal com Margem", calcs.totalWeeklyMeta],
-                    ["Projeção de Abatimento Semanal de Salário", state.weeklySalaryDiscount],
+                    ["Projeção de Abatimento Semanal de Salário", calcs.calculatedWeeklySalaryDiscount],
                     ["Salário Estimado Esperado", state.salaryValue],
                     ["Dia Configurado para Pagamento", state.salaryDay],
                     ["Margem de Segurança Aplicada", `${Math.round(state.safetyMargin * 100)}%`],
@@ -1384,7 +1395,6 @@
                     </div>
                 `;
             } else {
-                // OPÇÕES DOS CARTÕES CADASTRADOS PARA A SELEÇÃO
                 let selectOptions = `<option value="" disabled selected>Selecione um cartão</option>`;
                 if (state.cards.length === 0) {
                     selectOptions = `<option value="" disabled>Cadastre uma Fatura Primeiro!</option>`;

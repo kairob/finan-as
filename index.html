@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Meta Semanal - Finanças Privadas</title>
+    <!-- Biblioteca SheetJS para geração de arquivos Excel nativos diretamente no navegador -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.mini.min.js"></script>
     <style>
         /* --- ESTILOS NATIVOS CSS DE ALTO DESEMPENHO (Premium Dark Theme) --- */
@@ -90,6 +91,7 @@
             border: 1px solid rgba(59, 130, 246, 0.25);
         }
 
+        /* Indicador de Segurança Local com Botão Exportar Excel */
         .sync-banner {
             background-color: #1a2333;
             border-bottom: 1px solid var(--border-color);
@@ -144,6 +146,7 @@
             margin: 0 auto;
         }
 
+        /* --- CARDS & METRICAS --- */
         .meta-card {
             background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
             border-radius: 20px;
@@ -255,6 +258,7 @@
             margin: 24px 0 12px;
         }
 
+        /* --- LISTS & ITEM CARDS --- */
         .list-container {
             display: flex;
             flex-direction: column;
@@ -351,6 +355,7 @@
         .info-row span:first-child { color: var(--text-muted); }
         .info-row span:last-child { font-weight: 700; color: #cbd5e1; }
 
+        /* --- CONTROLES DE AÇÕES DOS CARTÕES --- */
         .card-actions {
             display: flex;
             flex-direction: column;
@@ -413,6 +418,7 @@
             color: white;
         }
 
+        /* --- NAV BAR --- */
         nav {
             background-color: var(--card-bg);
             border-top: 1px solid var(--border-color);
@@ -477,6 +483,7 @@
             transform: scale(0.9);
         }
 
+        /* --- MODAIS --- */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -597,6 +604,7 @@
             margin-top: 10px;
         }
 
+        /* --- TOAST --- */
         .toast {
             position: fixed;
             bottom: 88px;
@@ -619,6 +627,7 @@
             transform: translateX(-50%) translateY(0);
         }
 
+        /* --- DIÁRIO --- */
         .log-tag {
             font-size: 10px;
             font-weight: 700;
@@ -658,7 +667,8 @@
     </div>
 
     <main id="main-content">
-        </main>
+        <!-- Injetado Dinamicamente -->
+    </main>
 
     <nav>
         <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn active">
@@ -686,6 +696,7 @@
         </button>
     </nav>
 
+    <!-- MODAL -->
     <div id="modal" class="modal-overlay" onclick="handleOverlayClick(event)">
         <div class="modal-container">
             <div class="modal-header">
@@ -705,6 +716,7 @@
         </div>
     </div>
 
+    <!-- MODAL DE ADIANTAMENTO RÁPIDO -->
     <div id="pay-modal" class="modal-overlay" onclick="handlePayOverlayClick(event)">
         <div class="modal-container" style="border-radius: 24px; padding: 24px;">
             <div class="modal-header">
@@ -804,6 +816,26 @@
             renderActiveTab();
         }
 
+        // --- SISTEMA CORRIGIDO DE CÁLCULO ESTREITO DE COPARTICIPAÇÃO ---
+        // Agora o total de coparticipações de um registro considera APENAS o valor correspondente ao nome do cartão.
+        // Se o cartão é "Mercado pago", só leremos a fração "MercadoPago", e assim sucessivamente.
+        function getSpecificCardLoanValue(loan, cardName) {
+            if (!loan || !cardName) return 0;
+            const normalizedCardName = cardName.trim().toLowerCase();
+            
+            if (normalizedCardName.includes('santander')) {
+                return parseFloat(loan.Santander || 0);
+            } else if (normalizedCardName.includes('nio') || normalizedCardName.includes('nubank')) {
+                return parseFloat(loan.Nio || 0);
+            } else if (normalizedCardName.includes('mercado pago') || normalizedCardName.includes('mercadopago')) {
+                return parseFloat(loan.MercadoPago || 0);
+            } else if (normalizedCardName.includes('picpay') || normalizedCardName.includes('pic pay')) {
+                return parseFloat(loan.PicPay || 0);
+            }
+            return 0;
+        }
+
+        // Função de somatório de todos os bancos de uma partilha (usado apenas na visualização da aba Partilhas)
         function getLoanTotal(l) {
             if (!l) return 0;
             return parseFloat(l.Santander || 0) + 
@@ -824,6 +856,7 @@
             return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         }
 
+        // --- MOTOR FINANCEIRO ---
         function calculateWeeklyMetas() {
             const [todayYear, todayMonth, todayDay] = simulatedTodayStr.split('-').map(Number);
             const today = new Date(todayYear, todayMonth - 1, todayDay);
@@ -846,16 +879,17 @@
                 const diffTime = computedDueDate.getTime() - today.getTime();
                 const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                // Busca as partilhas associadas a este cartão de forma insensível a maiúsculas/minúsculas
+                // Busca as partilhas e soma APENAS a fração que pertence a esse cartão de forma perfeita
                 const loansForCard = state.loans.filter(l => l.name.trim().toLowerCase() === card.name.trim().toLowerCase());
                 let loansTotal = 0;
                 loansForCard.forEach(l => {
-                    loansTotal += getLoanTotal(l);
+                    loansTotal += getSpecificCardLoanValue(l, card.name);
                 });
 
                 const totalBill = parseFloat(card.totalBill || 0);
                 const prepaidAmount = parseFloat(card.prepaid || 0);
                 
+                // CÁLCULO PERFEITO: Fatura total - Empréstimos vinculados a este cartão - Adiantamentos
                 const myShare = Math.max(0, totalBill - loansTotal - prepaidAmount);
                 const weeksRemaining = Math.max(1, daysRemaining / 7);
                 const weeklyEffort = myShare / weeksRemaining;
@@ -1074,9 +1108,8 @@
             `;
         }
 
-        // --- RENDER PARTILHAS (AGRUPADO INTELIGENTE POR PESSOA) ---
+        // --- RENDER PARTILHAS (AGRUPADO POR PESSOA) ---
         function renderPartilhas(container) {
-            // Agrupando as partilhas por nome da pessoa
             const groupedLoans = {};
             
             state.loans.forEach(l => {
@@ -1089,7 +1122,7 @@
                         MercadoPago: 0,
                         PicPay: 0,
                         cardsLinked: new Set(),
-                        ids: [] // Guarda os IDs originais para controle se necessário
+                        ids: []
                     };
                 }
                 
@@ -1146,9 +1179,7 @@
             `;
         }
 
-        // --- FUNÇÕES DE CONTROLE EM MASSA DAS PARTILHAS AGRUPADAS ---
         window.editGroupedLoan = function(debtorName) {
-            // Para editar mantendo o comportamento consistente, buscamos o primeiro registro da pessoa
             const loanObj = state.loans.find(l => (l.debtorName || "Co-responsável").trim() === debtorName);
             if (!loanObj) return;
 
@@ -1160,7 +1191,6 @@
             document.getElementById('modal-tabs-container').style.display = 'none';
             document.getElementById('modal').classList.add('open');
             
-            // Renderiza o form com os dados consolidados temporariamente para a edição desse registro base
             const grouped = { ...loanObj, Santander: 0, Nio: 0, MercadoPago: 0, PicPay: 0 };
             state.loans.forEach(l => {
                 if((l.debtorName || "Co-responsável").trim() === debtorName) {
@@ -1171,9 +1201,7 @@
                 }
             });
 
-            // Limpa os outros do mesmo nome para evitar duplicações fantasmas pós-salvamento unificado
             state.loans = state.loans.filter(l => (l.debtorName || "Co-responsável").trim() !== debtorName || l.id === loanObj.id);
-
             renderFormFields(grouped);
         }
 
@@ -1426,12 +1454,12 @@
                     </div>
                 `;
             } else {
-                let selectOptions = `<option value="" disabled selected>Selecione um cartão base principal</option>`;
+                let selectOptions = `<option value="" disabled selected>Selecione um cartão principal</option>`;
                 if (state.cards.length === 0) {
                     selectOptions = `<option value="" disabled>Cadastre uma Fatura Primeiro!</option>`;
                 } else {
                     state.cards.forEach(c => {
-                        const isSelected = editData && editData.name === c.name ? 'selected' : '';
+                        const isSelected = editData && editData.name.trim().toLowerCase() === c.name.trim().toLowerCase() ? 'selected' : '';
                         selectOptions += `<option value="${c.name}" ${isSelected}>${c.name}</option>`;
                     });
                 }

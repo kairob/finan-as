@@ -33,7 +33,7 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             font-family: var(--font-family);
-            padding-bottom: 90px;
+            padding-bottom: 95px;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -422,7 +422,7 @@
         nav {
             background-color: var(--card-bg);
             border-top: 1px solid var(--border-color);
-            height: 72px;
+            height: 76px;
             position: fixed;
             bottom: 0;
             left: 0;
@@ -430,7 +430,7 @@
             display: flex;
             justify-content: space-around;
             align-items: center;
-            padding: 0 12px;
+            padding: 0 8px;
             z-index: 99;
         }
 
@@ -442,19 +442,19 @@
             flex-direction: column;
             align-items: center;
             gap: 4px;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 700;
             cursor: pointer;
-            width: 72px;
-            height: 52px;
+            width: 60px;
+            height: 54px;
             justify-content: center;
             border-radius: 12px;
             transition: all 0.2s ease;
         }
 
         .nav-btn svg {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             stroke-width: 2.2;
         }
 
@@ -467,8 +467,8 @@
             background-color: var(--accent-color);
             color: white;
             border: none;
-            width: 48px;
-            height: 48px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -607,7 +607,7 @@
         /* --- TOAST --- */
         .toast {
             position: fixed;
-            bottom: 84px;
+            bottom: 88px;
             left: 50%;
             transform: translateX(-50%) translateY(100px);
             background-color: #1e293b;
@@ -639,6 +639,7 @@
         .log-tag.edicao { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
         .log-tag.remocao { background: rgba(244, 63, 94, 0.15); color: #fb7185; }
         .log-tag.adiantamento { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+        .log-tag.salario { background: rgba(167, 139, 250, 0.15); color: #c084fc; }
     </style>
 </head>
 <body>
@@ -680,11 +681,15 @@
             Faturas
         </button>
         <button onclick="openAddModal()" class="btn-fab" aria-label="Adicionar Novo">
-            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
         </button>
         <button onclick="switchTab('partilhas')" id="nav-partilhas" class="nav-btn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" /></svg>
             Partilhas
+        </button>
+        <button onclick="switchTab('salario')" id="nav-salario" class="nav-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h16.5c.621 0 1.125.504 1.125 1.125v12c0 .621-.504 1.125-1.125 1.125H3.75a1.125 1.125 0 0 1-1.125-1.125V5.625c0-.621.504-1.125 1.125-1.125Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75v3.5m-3-1.75h6" /></svg>
+            Salário
         </button>
         <button onclick="switchTab('diario')" id="nav-diario" class="nav-btn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
@@ -748,6 +753,12 @@
             loans: JSON.parse(localStorage.getItem('loans')) || initialLoans,
             history: JSON.parse(localStorage.getItem('history')) || initialHistory,
             safetyMargin: parseFloat(localStorage.getItem('safetyMargin')) || 0.15,
+            
+            // Novos campos do sistema de salário
+            salaryValue: parseFloat(localStorage.getItem('salaryValue')) || 0,
+            salaryDay: parseInt(localStorage.getItem('salaryDay')) || 1,
+            weeklySalaryDiscount: parseFloat(localStorage.getItem('weeklySalaryDiscount')) || 0,
+
             activeTab: 'dashboard',
             modalMode: 'create',
             modalFormTab: 'card',
@@ -760,6 +771,10 @@
             localStorage.setItem('loans', JSON.stringify(state.loans));
             localStorage.setItem('history', JSON.stringify(state.history));
             localStorage.setItem('safetyMargin', state.safetyMargin.toString());
+            
+            localStorage.setItem('salaryValue', state.salaryValue.toString());
+            localStorage.setItem('salaryDay', state.salaryDay.toString());
+            localStorage.setItem('weeklySalaryDiscount', state.weeklySalaryDiscount.toString());
         }
 
         function showToast(msg) {
@@ -808,7 +823,7 @@
             renderActiveTab();
         }
 
-        // Retorna o somatório de coparticipações/empréstimos a terceiros
+        // Retorna o somatório de coparticipações/empréstimos a terceiros de um grupo de cartão
         function getLoanTotal(l) {
             if (!l) return 0;
             return parseFloat(l.Santander || 0) + 
@@ -817,7 +832,20 @@
                    parseFloat(l.PicPay || 0);
         }
 
-        // --- MOTOR FINANCEIRO ATUALIZADO E TOTALMENTE CORRIGIDO ---
+        // Retorna quantos dias faltam para o próximo salário do dia configurado
+        function getDaysUntilPayday() {
+            const [todayYear, todayMonth, todayDay] = simulatedTodayStr.split('-').map(Number);
+            const today = new Date(todayYear, todayMonth - 1, todayDay);
+            
+            let payday = new Date(today.getFullYear(), today.getMonth(), state.salaryDay);
+            if (today.getDate() >= state.salaryDay) {
+                payday = new Date(today.getFullYear(), today.getMonth() + 1, state.salaryDay);
+            }
+            const diffTime = payday.getTime() - today.getTime();
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
+
+        // --- MOTOR FINANCEIRO ATUALIZADO COM DESCONTO RETROATIVO DE SALÁRIO ---
         function calculateWeeklyMetas() {
             const [todayYear, todayMonth, todayDay] = simulatedTodayStr.split('-').map(Number);
             const today = new Date(todayYear, todayMonth - 1, todayDay);
@@ -850,10 +878,10 @@
                 const totalBill = parseFloat(card.totalBill || 0);
                 const prepaidAmount = parseFloat(card.prepaid || 0);
                 
-                // CÁLCULO EXATO DA PARTE DO USUÁRIO: Fatura total - Empréstimos a terceiros - Adiantamentos pagos
+                // CÁLCULO EXATO DA PARTE DO USUÁRIO: Fatura total - Coparticipação (Empréstimo) - Adiantamentos pagos
                 const myShare = Math.max(0, totalBill - loansTotal - prepaidAmount);
 
-                // Meta Semanal baseada estritamente na minha parte líquida restante
+                // Meta Semanal baseada na parte líquida restante
                 const weeksRemaining = Math.max(1, daysRemaining / 7);
                 const weeklyEffort = myShare / weeksRemaining;
 
@@ -874,9 +902,14 @@
                 };
             });
 
-            // Somatório das metas individuais líquidas atualizadas em tempo real
+            // Meta Semanal base de todos os cartões somados
             const baseWeeklyMeta = processedCards.reduce((sum, item) => sum + item.weeklyEffort, 0);
-            const totalWeeklyMeta = baseWeeklyMeta * (1 + state.safetyMargin);
+            
+            // Meta Semanal com margem de segurança aplicada
+            const totalWeeklyMetaWithMargin = baseWeeklyMeta * (1 + state.safetyMargin);
+
+            // APLICAÇÃO DO DESCONTO SEMANAL RETROATIVO DO SALÁRIO ANTES DELE CHEGAR
+            const finalNetWeeklyMeta = Math.max(0, totalWeeklyMetaWithMargin - state.weeklySalaryDiscount);
 
             return {
                 processedCards,
@@ -885,7 +918,8 @@
                 totalLoansSum,
                 totalMyShare,
                 baseWeeklyMeta,
-                totalWeeklyMeta
+                totalWeeklyMeta: totalWeeklyMetaWithMargin, // mantendo compatibilidade do nome
+                finalNetWeeklyMeta
             };
         }
 
@@ -908,6 +942,8 @@
                 renderCartoes(container, data);
             } else if (state.activeTab === 'partilhas') {
                 renderPartilhas(container);
+            } else if (state.activeTab === 'salario') {
+                renderSalario(container);
             } else if (state.activeTab === 'diario') {
                 renderDiario(container);
             }
@@ -919,16 +955,18 @@
             renderActiveTab();
         };
 
-        // --- INTERFACES DE VISUALIZAÇÃO ---
+        // --- INTERFACE DO DASHBOARD ---
         function renderDashboard(container, data) {
             const marginPercent = Math.round(state.safetyMargin * 100);
 
             container.innerHTML = `
-                <!-- VALOR DA META SEMANAL DINÂMICA COM MARGEM DE SEGURANÇA -->
+                <!-- VALOR DA META SEMANAL DINÂMICA COM PROJEÇÃO RETROATIVA DE SALÁRIO -->
                 <div class="meta-card">
-                    <span class="meta-card-label">Meta Semanal (Com Margem)</span>
-                    <h2 class="meta-card-value">${formatBRL(data.totalWeeklyMeta)}</h2>
-                    <p class="meta-card-desc">Cálculo contínuo com acréscimo de +${marginPercent}% de margem de segurança.</p>
+                    <span class="meta-card-label">Meta Semanal Líquida Final</span>
+                    <h2 class="meta-card-value">${formatBRL(data.finalNetWeeklyMeta)}</h2>
+                    <p class="meta-card-desc">
+                        Meta com margem (${formatBRL(data.totalWeeklyMeta)}) menos Abatimento de Salário Antecipado (-${formatBRL(state.weeklySalaryDiscount)}).
+                    </p>
                 </div>
                 
                 <!-- CONTROLE INTERATIVO DA MARGEM DE SEGURANÇA -->
@@ -948,8 +986,8 @@
                         <span class="summary-value">${formatBRL(data.baseWeeklyMeta)}</span>
                     </div>
                     <div class="summary-card">
-                        <span class="summary-label">Minha Parte Líquida Total</span>
-                        <span class="summary-value" style="color: #60a5fa;">${formatBRL(data.totalMyShare)}</span>
+                        <span class="summary-label">Abatimento de Salário</span>
+                        <span class="summary-value" style="color: #a78bfa;">-${formatBRL(state.weeklySalaryDiscount)}</span>
                     </div>
                 </div>
 
@@ -1003,7 +1041,7 @@
                             </div>
                             <div class="info-row">
                                 <span>Adiantamento efetuado: ${formatBRL(c.prepaidAmount)}</span>
-                                <span style="font-weight: 800; color: #60a5fa;">Minha Parte Líquida: ${formatBRL(c.myShare)}</span>
+                                <span style="font-weight: 800; color: #60a5fa;">Sua Parte Líquida: ${formatBRL(c.myShare)}</span>
                             </div>
                         </div>
                     `;
@@ -1011,6 +1049,7 @@
             `;
         }
 
+        // --- INTERFACE DE FATURAS ---
         function renderCartoes(container, data) {
             container.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
@@ -1032,7 +1071,7 @@
                             </div>
                             
                             <div class="info-row">
-                                <span>Coparticipações (Empréstimo a terceiros)</span>
+                                <span>Coparticipações (Empréstimos a terceiros)</span>
                                 <span style="color: var(--warning-color);">- ${formatBRL(c.loansTotal)}</span>
                             </div>
                             <div class="info-row">
@@ -1040,7 +1079,7 @@
                                 <span style="color: var(--success-color);">- ${formatBRL(c.prepaidAmount)}</span>
                             </div>
                             <div class="info-row" style="border-top: 1px solid var(--border-color); font-weight: bold;">
-                                <span style="color: white;">Parte Líquida a Pagar (Sua Parte)</span>
+                                <span style="color: white;">Parte Líquida a Pagar (Minha Parte)</span>
                                 <span style="color: #60a5fa; font-size: 14px;">${formatBRL(c.myShare)}</span>
                             </div>
 
@@ -1060,6 +1099,7 @@
             `;
         }
 
+        // --- INTERFACE DE COPARTICIPAÇÕES ---
         function renderPartilhas(container) {
             container.innerHTML = `
                 <h3 class="section-title">Coparticipações Ativas</h3>
@@ -1100,6 +1140,67 @@
             `;
         }
 
+        // --- NOVA ABA DE CONFIGURAÇÃO DE SALÁRIO ---
+        function renderSalario(container) {
+            const daysLeft = getDaysUntilPayday();
+            
+            container.innerHTML = `
+                <h3 class="section-title">Configurações de Salário</h3>
+                
+                <div class="item-card" style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span class="item-title" style="color: #a78bfa;">Próximo Salário</span>
+                        <span class="status-pill green">Faltam ${daysLeft} dias</span>
+                    </div>
+                    <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
+                        Seu salário está previsto para o dia <strong>${state.salaryDay}</strong> de cada mês. Você pode usar a projeção semanal abaixo para reduzir a sua meta antes mesmo do salário ser depositado.
+                    </p>
+                </div>
+
+                <div class="item-card">
+                    <form onsubmit="saveSalarySettings(event)">
+                        <div class="form-group">
+                            <label class="form-label">Valor Estimado do Salário Mensal (R$)</label>
+                            <input type="number" step="0.01" min="0" required id="f-salary-value" class="form-input" placeholder="Ex: 3000.00" value="${state.salaryValue}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Dia de Recebimento do Salário (Geralmente dia 1)</label>
+                            <input type="number" min="1" max="31" required id="f-salary-day" class="form-input" placeholder="Ex: 1" value="${state.salaryDay}">
+                        </div>
+
+                        <div class="form-group" style="border-top: 1px dashed var(--border-color); padding-top: 16px; margin-top: 16px;">
+                            <label class="form-label" style="color: #a78bfa; font-weight: 800;">Abatimento Semanal Projetado (R$)</label>
+                            <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px; line-height: 1.4;">
+                                Insira o valor semanal do salário que você deseja antecipar para cobrir as contas. 
+                                <strong>Esse valor será descontado diretamente da sua Meta Semanal líquida no painel de Metas.</strong>
+                            </p>
+                            <input type="number" step="0.01" min="0" required id="f-salary-weekly-discount" class="form-input" placeholder="Ex: 500.00" value="${state.weeklySalaryDiscount}">
+                        </div>
+
+                        <button type="submit" class="btn-submit" style="background-color: var(--accent-color);">Salvar Configuração de Salário</button>
+                    </form>
+                </div>
+            `;
+        }
+
+        window.saveSalarySettings = function(e) {
+            e.preventDefault();
+            const salaryVal = parseFloat(document.getElementById('f-salary-value').value) || 0;
+            const salaryD = parseInt(document.getElementById('f-salary-day').value) || 1;
+            const weeklyDiscount = parseFloat(document.getElementById('f-salary-weekly-discount').value) || 0;
+
+            state.salaryValue = salaryVal;
+            state.salaryDay = salaryD;
+            state.weeklySalaryDiscount = weeklyDiscount;
+
+            saveState();
+            logToJournal('salario', `Configuração de salário atualizada. Salário: ${formatBRL(salaryVal)}, Abatimento semanal: ${formatBRL(weeklyDiscount)}.`, salaryVal);
+            showToast('Configurações de Salário salvas!');
+            switchTab('dashboard');
+        }
+
+        // --- INTERFACE DO DIÁRIO ---
         function renderDiario(container) {
             container.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
@@ -1138,7 +1239,7 @@
             }
         }
 
-        // --- EXPORTAÇÃO EXCEL NATIVA ---
+        // --- EXPORTAÇÃO EXCEL NATIVA COM DETALHE DO SALÁRIO ---
         window.exportToExcel = function() {
             try {
                 const calcs = calculateWeeklyMetas();
@@ -1149,8 +1250,12 @@
                     ["Data da Exportação", new Date().toLocaleDateString('pt-BR')],
                     [],
                     ["MÉTRICAS GERAIS"],
-                    ["Minha Meta Semanal (Com Margem)", calcs.totalWeeklyMeta],
+                    ["Minha Meta Semanal Ajustada (Final)", calcs.finalNetWeeklyMeta],
                     ["Meta Semanal Base (Sem Margem)", calcs.baseWeeklyMeta],
+                    ["Meta Semanal com Margem", calcs.totalWeeklyMeta],
+                    ["Projeção de Abatimento Semanal de Salário", state.weeklySalaryDiscount],
+                    ["Salário Estimado Esperado", state.salaryValue],
+                    ["Dia Configurado para Pagamento", state.salaryDay],
                     ["Margem de Segurança Aplicada", `${Math.round(state.safetyMargin * 100)}%`],
                     ["Minha Parte Líquida Total (Mês)", calcs.totalMyShare],
                     ["Total Bruto Faturas Cadastradas", calcs.totalBaseBill],

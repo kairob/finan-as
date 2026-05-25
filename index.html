@@ -736,7 +736,7 @@
         </div>
     </div>
 
-    <div id="toast" class="toast"><span id="toast-msg">Salvo!</span></div>
+    <div id="toast" class="toast" onclick="hideToast()"><span id="toast-msg">Salvo!</span></div>
 
     <script>
         const initialCards = [];
@@ -770,13 +770,38 @@
             localStorage.setItem('salaryDay', state.salaryDay.toString());
         }
 
+        // Variável global para gerenciar com segurança o tempo de exibição do toast
+        let toastTimeout = null;
+
         function showToast(msg) {
             const toast = document.getElementById('toast');
-            document.getElementById('toast-msg').textContent = msg;
-            toast.classList.add('show');
-            setTimeout(() => {
+            const toastMsg = document.getElementById('toast-msg');
+            
+            if (toast && toastMsg) {
+                // Cancela qualquer timeout pendente para evitar bugs de transição
+                if (toastTimeout) {
+                    clearTimeout(toastTimeout);
+                }
+                
+                toastMsg.textContent = msg;
+                toast.classList.add('show');
+                
+                toastTimeout = setTimeout(() => {
+                    toast.classList.remove('show');
+                    toastTimeout = null;
+                }, 2500);
+            }
+        }
+
+        function hideToast() {
+            const toast = document.getElementById('toast');
+            if (toast) {
                 toast.classList.remove('show');
-            }, 2500);
+                if (toastTimeout) {
+                    clearTimeout(toastTimeout);
+                    toastTimeout = null;
+                }
+            }
         }
 
         function formatBRL(v) {
@@ -955,6 +980,9 @@
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
             const activeNavBtn = document.getElementById(`nav-${tabName}`);
             if (activeNavBtn) activeNavBtn.classList.add('active');
+            
+            // Força a remoção do toast ativo ao trocar de aba por segurança
+            hideToast();
             renderActiveTab();
         }
 

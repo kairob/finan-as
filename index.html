@@ -887,12 +887,10 @@
             return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         }
 
-        // --- MOTOR FINANCEIRO RESTAURADO COM CÁLCULO DE DIAS CORRENTES (SEM AUTO-ROLLOVER ANTECIPADO) ---
+        // --- MOTOR FINANCEIRO ADAPTADO COM ENTRADA DE DATA EXATA ---
         function calculateWeeklyMetas() {
             const [todayYear, todayMonth, todayDay] = simulatedTodayStr.split('-').map(Number);
             const today = new Date(todayYear, todayMonth - 1, todayDay);
-            const currentYear = today.getFullYear();
-            const currentMonth = today.getMonth();
 
             let totalBaseBill = 0;
             let totalPrepaid = 0;
@@ -900,18 +898,22 @@
             let totalMyShare = 0;
 
             const processedCards = state.cards.map(card => {
-                const dueDay = parseInt(card.dueDay);
-                let computedDueDate = new Date(currentYear, currentMonth, dueDay);
+                // card.dueDate está gravado no formato nativo 'YYYY-MM-DD'
+                const [cardYear, cardMonth, cardDay] = card.dueDate.split('-').map(Number);
+                let computedDueDate = new Date(cardYear, cardMonth - 1, cardDay);
 
                 // Lógica de cálculo do tempo restante corrente
                 let diffTime = computedDueDate.getTime() - today.getTime();
                 let daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                // Se já passou da data de vencimento deste mês, calcula para o próximo mês
+                // Se a data de vencimento escolhida já passou de forma corrente,
+                // rolamos automaticamente para o mesmo dia no mês subsequente
                 if (daysRemaining < 0) {
-                    computedDueDate = new Date(currentYear, currentMonth + 1, dueDay);
-                    diffTime = computedDueDate.getTime() - today.getTime();
-                    daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    while (daysRemaining < 0) {
+                        computedDueDate.setMonth(computedDueDate.getMonth() + 1);
+                        diffTime = computedDueDate.getTime() - today.getTime();
+                        daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    }
                 }
 
                 // Soma a fração específica deste cartão de TODAS as partilhas cadastradas, garantindo o abatimento correto
@@ -927,7 +929,7 @@
                 const myShare = Math.max(0, totalBill - loansTotal - prepaidAmount);
                 const weeksRemaining = Math.max(1, daysRemaining / 7);
                 
-                // ESFORÇO SEMANAL BASEADO NA PARTE LÍQUIDA REAL DO USUÁRIO
+                // ESFORÇO SEMANAL BASEADO NA DATA DE VENCIMENTO DO CARTÃO
                 const weeklyEffort = myShare / weeksRemaining;
 
                 totalBaseBill += totalBill;
@@ -1070,7 +1072,7 @@
                             <div class="item-card-header">
                                 <div>
                                     <h4 class="item-title">${c.name}</h4>
-                                    <span class="item-subtitle">Vencimento: Dia ${c.dueDay} (${displayDays})</span>
+                                    <span class="item-subtitle">Vencimento: ${c.computedDueDate.toLocaleDateString('pt-BR')} (${displayDays})</span>
                                 </div>
                                 <span class="status-pill ${color}">Meta Semanal: ${formatBRL(c.weeklyEffort * (1 + state.safetyMargin))}</span>
                             </div>
@@ -1113,7 +1115,7 @@
                             <div class="item-card-header">
                                 <div>
                                     <h3 class="item-title">${c.name}</h3>
-                                    <span class="item-subtitle">Próximo Vencimento: ${c.computedDueDate.toLocaleDateString('pt-BR')} (Dia ${c.dueDay})</span>
+                                    <span class="item-subtitle">Próximo Vencimento: ${c.computedDueDate.toLocaleDateString('pt-BR')}</span>
                                 </div>
                                 <div class="item-value-side"><span class="item-value-label">Total Fatura</span><span class="item-value-main">${formatBRL(c.totalBill)}</span></div>
                             </div>
@@ -1378,14 +1380,14 @@
                     ["Total de Pagamentos Adiantados", calcs.totalPrepaid],
                     [],
                     ["CONTROLE DE FATURAS E CARTÕES"],
-                    ["Nome do Cartão", "Valor Total (R$)", "Dia Vencimento", "Próximo Vencimento", "Dívida Devedores (R$)", "Adiantamento Pago (R$)", "Minha Parte Líquida (R$)", "Esforço Semanal Requerido (R$)", "Dias Restantes"]
+                    ["Nome do Cartão", "Valor Total (R$)", "Data Vencimento Inicial", "Próximo Vencimento", "Dívida Devedores (R$)", "Adiantamento Pago (R$)", "Minha Parte Líquida (R$)", "Esforço Semanal Requerido (R$)", "Dias Restantes"]
                 ];
 
                 calcs.processedCards.forEach(c => {
                     summaryHeader.push([
                         c.name,
                         c.totalBill,
-                        c.dueDay,
+                        c.dueDate,
                         c.computedDueDate.toLocaleDateString('pt-BR'),
                         c.loansTotal,
                         c.prepaidAmount,
@@ -1506,8 +1508,8 @@
                         <input type="number" step="0.01" min="0" required id="f-card-bill" class="form-input" placeholder="Valor Total da Fatura" value="${editData ? editData.totalBill : ''}">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Dia de Vencimento do Cartão</label>
-                        <input type="number" min="1" max="31" required id="f-card-day" class="form-input" placeholder="Ex: 5" value="${editData ? editData.dueDay : ''}">
+                        <label class="form-label">Data de Vencimento do Cartão</label>
+                        <input type="date" required id="f-card-date" class="form-input" value="${editData ? editData.dueDate : ''}">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Valor de Adiantamento Inicial (R$)</label>
@@ -1571,17 +1573,17 @@
             if (state.modalFormTab === 'card') {
                 const name = document.getElementById('f-card-name').value.trim();
                 const totalBill = parseFloat(document.getElementById('f-card-bill').value) || 0;
-                const dueDay = parseInt(document.getElementById('f-card-day').value);
+                const dueDate = document.getElementById('f-card-date').value;
                 const prepaid = parseFloat(document.getElementById('f-card-prepaid').value) || 0;
 
                 if (state.modalMode === 'edit') {
                     const idx = state.cards.findIndex(i => i.id === state.editingId);
                     if (idx !== -1) {
-                        state.cards[idx] = { ...state.cards[idx], name, totalBill, dueDay, prepaid };
+                        state.cards[idx] = { ...state.cards[idx], name, totalBill, dueDate, prepaid };
                         logToJournal('edicao', `Edição de cartão: ${name}. Fatura: ${formatBRL(totalBill)}.`, totalBill);
                     }
                 } else {
-                    state.cards.push({ id: Date.now().toString(), name, totalBill, dueDay, prepaid });
+                    state.cards.push({ id: Date.now().toString(), name, totalBill, dueDate, prepaid });
                     logToJournal('criacao', `Criação do cartão ${name}.`, totalBill);
                 }
                 switchTab('cartoes');

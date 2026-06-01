@@ -16,7 +16,7 @@
             --text-muted: #94a3b8;
             --accent-color: #3b82f6;
             --accent-hover: #1d4ed8;
-            --success-color: #10b981;
+            --success-color: #10b981; 
             --warning-color: #f59e0b;
             --danger-color: #f43f5e;
             --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -915,10 +915,9 @@
                     daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 }
 
-                // Busca as partilhas e soma APENAS a fração específica deste cartão normalizado
-                const loansForCard = state.loans.filter(l => normalizeString(l.name) === normalizeString(card.name));
+                // Soma a fração específica deste cartão de TODAS as partilhas cadastradas, garantindo o abatimento correto
                 let loansTotal = 0;
-                loansForCard.forEach(l => {
+                state.loans.forEach(l => {
                     loansTotal += getSpecificCardLoanValue(l, card.name);
                 });
 
@@ -1321,7 +1320,7 @@
         function renderDiario(container) {
             container.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                    <h3 class="section-title" style="margin: 0;">Registro Cronológico de Ações</h3>
+                    <h3 class="section-title" style="margin: 0;">Registro Chronológico de Ações</h3>
                     <button class="btn-action delete" style="padding: 6px 12px; font-size: 10px; min-width: auto; flex: none" onclick="clearJournal()">Limpar Diário</button>
                 </div>
                 <div class="list-container">
